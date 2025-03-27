@@ -1,40 +1,36 @@
-# DevinD (Dev in Docker) - Buildflow Management with Docker Compose and Makefiles
+# DevinD (Dev in Docker) - Buildflow Management with Docker and Makefiles
 
 ## Introduction
 
-**DevinD (Dev in Docker)** is a project designed to manage development workflows efficiently using Makefiles in conjunction with Docker Compose. The primary goal is to provide a flexible system where you can build, test, and execute tools in various environments, including local, local Docker containers, and remote Docker containers/machines via SSH. This flexibility allows developers to work in environments that suit their needs while ensuring consistency across different execution contexts.
+**DevinD (Dev in Docker)** is a flexible tool designed to manage development workflows using Makefiles. It provides a unified way to build, test, and execute development tasks across multiple environments such as local machines, Docker containers, remote machines, and remote Docker containers. DevinD ensures that the build process remains consistent and easy to manage, even when targeting different execution environments.
 
 ## Features
 
 - **Unified Makefile Workflow**: Manage build, test, and execution tasks with a consistent interface using Makefiles.
 - **Local Execution**: Run goals locally on your machine if the required tools are installed.
-- **Dockerized Execution**: Seamlessly execute goals in a local Docker container using Docker Compose.
-- **Remote Execution**: Execute goals on a remote Docker container or machine via SSH for distributed environments.
-- **Configurable Execution Targets**: Each goal can depend on specific configurations that define how and where it should be executed (locally, in Docker, or remotely). 
+- **Dockerized Execution**: Seamlessly execute goals inside a local Docker container.
+- **Remote Execution**: Execute goals on a remote machine via SSH for distributed environments.
+- **Remote Docker Execution**: Execute goals inside a remote Docker container.
+- **Configurable Execution Targets**: Each goal can depend on specific configurations that define how and where it should be executed (locally, in Docker, or remotely).
 
 ## Execution Strategy Overview
 
-**DevinD** integrates a unified approach to goal execution, managing local, Docker, and remote (SSH) environments. This approach combines two main propositions for implementing execution configurations and environments:
+**DevinD** offers flexibility in managing execution across local, Docker, remote, and remote Docker environments. The selected strategy for execution is the **`devind` Wrapper Script**.
 
-### Proposition 1: Unified `Makefile` with Execution Configurations
+### `devind` Wrapper Script
 
-- **Local Execution**: The primary `Makefile` handles standard local executions. It assumes all necessary tools are installed on the local machine and runs the specified goals directly.
-
-- **Configured Execution**: For scenarios where goals require specific configurations, the same `Makefile` can be used with additional parameters or configuration files. Execution details such as environment variables or configuration files can be specified to adjust how the goal is executed, whether locally, in Docker, or on a remote machine.
-
-  - **Implementation**: Execution details are managed through environment variables or configuration options within the `Makefile`. For instance, setting `VAR_XY=something` or referencing a configuration file can influence the execution behavior.
-
-### Proposition 2: `devind` Wrapper Script
+The **`devind` wrapper script** is designed to seamlessly manage different execution environments while keeping the existing Makefile-based workflow intact. Here's how it works:
 
 - **Local Execution**: For basic local execution, the primary `Makefile` remains the main tool, handling tasks with no special configurations needed.
+  
+- **Configured Execution**: The `devind` script wraps around the `Makefile`, providing the necessary environment configurations to facilitate running goals in Docker containers or remote machines. This ensures the build process remains consistent across environments and requires minimal modification of existing projects.
 
-- **Configured Execution**: The `devind` script acts as a wrapper around the `Makefile`, providing an additional layer of handling for goals requiring specific configurations. It reads configuration files or environment variables to apply the appropriate settings and manage more complex scenarios, including Docker and remote executions.
+- **Scalability**: The `devind` script is scalable and can be adapted to different projects without modifying the existing Makefile. It simply manages execution environments and configuration, keeping the build process intact.
 
-  - **Implementation**: The `devind` script wraps around the `Makefile`, invoking it with the necessary configuration settings. It facilitates execution in Docker containers or on remote machines by managing the appropriate configurations and ensuring that goals are executed as specified.
-
-### Evaluation and Next Steps
-
-The effectiveness of these propositions will be evaluated to determine the most suitable approach for **DevinD**. Testing and refinement will guide the final implementation, aiming to ensure that the strategy provides the desired flexibility and efficiency in goal execution.
+### Benefits of the `devind` Wrapper Script:
+- **No Disruption to Existing Projects**: The wrapper script doesn’t require changes to the existing Makefile structure or workflows, ensuring backward compatibility.
+- **Environment Abstraction**: The `devind` script abstracts away the complexity of managing different environments, such as Docker or remote execution, from the developer's workflow.
+- **Long-Term Flexibility**: It provides the flexibility to easily switch or add new environments, such as Docker containers or remote SSH execution, without altering the project’s core logic.
 
 ## Contribution
 
