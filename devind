@@ -1,0 +1,19 @@
+#!/usr/bin/make -f devind
+MAKEFILE_ENTRY ?= example/hello-world/Makefile
+DEF_DEV_TARGET ?= local
+
+# Verbosity selection
+ifeq ($(V),1)
+QUIET := 
+else
+QUIET := @
+endif
+
+# Command prefix and suffix definition
+ifeq ($(DEF_DEV_TARGET),local)
+CMD_PREFIX := make -f $(MAKEFILE_ENTRY)
+endif
+
+# Running goals on configured dev target 
+%:
+	$(QUIET) $(CMD_PREFIX) "$@" $(CMD_SUFFIX)
