@@ -1,6 +1,6 @@
 #!/usr/bin/make -f devind
 MAKEFILE_ENTRY ?= example/hello-world/Makefile
-DEF_DEV_TARGET ?= local
+DEFAULT_DEV_TARGET ?= local
 
 # Verbosity selection
 ifeq ($(V),1)
@@ -10,7 +10,7 @@ QUIET := @
 endif
 
 # Command prefix and suffix definition
-ifeq ($(DEF_DEV_TARGET),local)
+ifeq ($(DEFAULT_DEV_TARGET),local)
 CMD_PREFIX := make -f $(MAKEFILE_ENTRY)
 endif
 
