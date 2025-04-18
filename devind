@@ -1,6 +1,6 @@
 #!/usr/bin/make -f devind
-MAKEFILE_ENTRY ?= example/hello-world/Makefile
-DEFAULT_DEV_TARGET ?= local
+DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
+DEVIND_DEFAULT_TARGET ?= local
 DEVIND_FOLDER ?= .devind
 
 # Verbosity selection
@@ -11,8 +11,8 @@ QUIET := @
 endif
 
 # Command prefix and suffix definition
-ifeq ($(DEFAULT_DEV_TARGET),local)
-CMD_PREFIX := make -f $(MAKEFILE_ENTRY)
+ifeq ($(DEVIND_DEFAULT_TARGET),local)
+CMD_PREFIX := make -f $(DEVIND_MAKEFILE_ENTRY)
 endif
 
 # Devind Folder Creation
