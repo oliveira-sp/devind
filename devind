@@ -1,6 +1,7 @@
 #!/usr/bin/make -f devind
 MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEFAULT_DEV_TARGET ?= local
+DEVIND_FOLDER ?= .devind
 
 # Verbosity selection
 ifeq ($(V),1)
@@ -13,6 +14,15 @@ endif
 ifeq ($(DEFAULT_DEV_TARGET),local)
 CMD_PREFIX := make -f $(MAKEFILE_ENTRY)
 endif
+
+# Devind Folder Creation
+$(DEVIND_FOLDER):
+	$(QUIET)echo Creating $@ folder
+	$(QUIET)mkdir $@
+
+# Configure devind
+.PHONY: configure-devind
+configure-devind: .devind
 
 # Running goals on configured dev target 
 %:
