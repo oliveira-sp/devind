@@ -17,7 +17,7 @@ endif
 
 # Devind Folder Creation
 $(DEVIND_FOLDER):
-	$(QUIET)echo Creating $@ folder
+	$(info [CONF] Creating DevinD folder: $@)
 	$(QUIET)mkdir $@
 
 # Configure devind
