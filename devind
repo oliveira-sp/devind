@@ -1,4 +1,21 @@
 #!/usr/bin/make -f
+#------------------------------------------------------------------------------
+# DevinD Makefile
+#------------------------------------------------------------------------------
+# Project      : DevinD (Dev in Docker)
+# Description  : Flexible Makefile wrapper supporting local, Docker, and SSH execution
+# Author       : Oliveira S.
+# Version      : NA
+# License      : MIT
+#------------------------------------------------------------------------------
+# Usage        : ./devind [target]
+#------------------------------------------------------------------------------
+# Notes:
+# - This Makefile is designed to run as an executable script.
+# - Supports execution in various environments defined in `devind.yaml`.
+# - MIT license applies to all custom environments and wrapper behavior.
+#------------------------------------------------------------------------------
+
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEVIND_DEFAULT_DEVTARGET ?= local
 DEVIND_FOLDER ?= .devind
