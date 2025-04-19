@@ -1,4 +1,4 @@
-#!/usr/bin/make -f devind
+#!/usr/bin/make -f
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEVIND_DEFAULT_DEVTARGET ?= local
 DEVIND_FOLDER ?= .devind
