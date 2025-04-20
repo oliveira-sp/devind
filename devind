@@ -39,7 +39,7 @@ $(DEVIND_FOLDER):
 
 # Configure devind
 .PHONY: configure-devind
-configure-devind: $(DEVIND_FOLDER)
+configure-devind: | $(DEVIND_FOLDER)
 
 # Running goals on configured dev target 
 %:
