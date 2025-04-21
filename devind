@@ -20,19 +20,15 @@
 #------------------------------------------------------------------------------
 
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
-DEVIND_DEFAULT_DEVTARGET ?= local
 DEVIND_FOLDER ?= .devind
+
+$(wildcard -include $(DEVIND_FOLDER)/*.mk)
 
 # Verbosity selection
 ifeq ($(V),1)
 QUIET := 
 else
 QUIET := @
-endif
-
-# Command prefix and suffix definition
-ifeq ($(DEVIND_DEFAULT_DEVTARGET),local)
-CMD_PREFIX := make -f $(DEVIND_MAKEFILE_ENTRY)
 endif
 
 # Devind Folder Creation
@@ -45,5 +41,6 @@ $(DEVIND_FOLDER):
 configure-devind: | $(DEVIND_FOLDER)
 
 # Running goals on configured dev target 
-%:
+%: | $(DEVIND_DEVTARGET)
+	$(info [EXEC] Running make target `$@` in devtarget: $(DEVIND_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) "$@" $(CMD_SUFFIX)
