@@ -22,7 +22,7 @@
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEVIND_FOLDER ?= .devind
 
-$(wildcard -include $(DEVIND_FOLDER)/*.mk)
+-include $(wildcard $(DEVIND_FOLDER)/*.mk)
 
 # Verbosity selection
 ifeq ($(V),1)
