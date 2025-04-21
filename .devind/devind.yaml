@@ -1,0 +1,37 @@
+default_devtarget: dev-local
+
+global:
+  DOCKER_IMAGE: example/devind:1.0
+  CMD_EXEC: make -f $(DEVIND_MAKEFILE_ENTRY)
+
+profiles:
+  docker:
+    DOCKER_CMD: docker run
+  docker-interactive:
+    DOCKER_OPT+: -it
+  docker-remove:
+    DOCKER_OPT+: --rm
+  docker-bind-workspace:
+	  DOCKER_OPT+: -v .:/home/dev
+	  DOCKER_OPT+: -w /home/dev
+  dummy:
+    DUMMY_VAR: $(FOO)
+
+devtargets:
+  local:
+    CMD_PREFIX: $(CMD_EXEC)
+
+  docker-build:
+    profiles:
+      - docker
+      - docker-remove
+      - docker-interactive
+      - docker-bind-workspace
+    var:
+      DOCKER_NAME: my-docker-build-container
+      DOCKER_OPT+: --name $(DOCKER_NAME)
+    CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
+
+goals:
+  build-*: dev-docker-build
+  b: dev-docker-build profile-dummy
