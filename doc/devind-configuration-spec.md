@@ -205,11 +205,13 @@ global:
 profiles:
   docker:
     DOCKER_CMD: docker run
-    CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
   docker_interactive:
     DOCKER_OPT+: -it
   docker_remove:
     DOCKER_OPT+: --rm
+  docker-bind-workspace:
+	  DOCKER_OPT+: -v .:/home/dev
+	  DOCKER_OPT+: -w /home/dev
   dummy:
     DUMMY_VAR: $(FOO)
 
@@ -222,10 +224,11 @@ devtargets:
       - docker
       - docker_remove
       - docker_interactive
+      - docker-bind-workspace
     var:
       DOCKER_NAME: my-docker-build-container
       DOCKER_OPT+: --name $(DOCKER_NAME)
-    CMD_SUFFIX: -f Dockerfile
+    CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
 
 goals:
   build-*: dev-docker-build
