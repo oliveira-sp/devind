@@ -196,7 +196,7 @@ Although `:=` is used internally (immediate expansion), the order in which value
 Here’s a simple example of a complete **DevinD** YAML configuration file:
 
 ```yaml
-default_devtarget: dev_local
+default_devtarget: dev-local
 
 global:
   DOCKER_IMAGE: example/devind:1.0
@@ -205,9 +205,9 @@ global:
 profiles:
   docker:
     DOCKER_CMD: docker run
-  docker_interactive:
+  docker-interactive:
     DOCKER_OPT+: -it
-  docker_remove:
+  docker-remove:
     DOCKER_OPT+: --rm
   docker-bind-workspace:
 	  DOCKER_OPT+: -v .:/home/dev
@@ -222,8 +222,8 @@ devtargets:
   docker-build:
     profiles:
       - docker
-      - docker_remove
-      - docker_interactive
+      - docker-remove
+      - docker-interactive
       - docker-bind-workspace
     var:
       DOCKER_NAME: my-docker-build-container
