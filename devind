@@ -21,6 +21,7 @@
 
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEVIND_FOLDER ?= .devind
+DEVIND_YAML_FILE ?= $(DEVIND_FOLDER)/devind.yaml
 
 # Include devtarget mapping
 include $(DEVIND_FOLDER)/devtargets.mk
@@ -48,12 +49,20 @@ generate:
 	@true
 	$(info [CONF] Generating DevinD definition Makefile)
 
+# Define the function to fetch the goal value from the YAML file with trimming
+define fetch_goal_devtarget
+  $(shell awk '/goals:/ {flag=1} flag && $$1 == "$(1):" {gsub(/^[ \t]+|[ \t]+$$/, "", $$2); print $$2; flag=0} flag && /^[^ ]/ && $$1 != "goals:" {flag=0}' $(DEVIND_YAML_FILE))
+endef
+
+DEVIND_DEVTARGET := $(strip $(call fetch_goal_devtarget,$(GOAL)))
+DEV_TARGET_FILE:= $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
+
+
 # --- Target runner for DevTarget ---
 # This rule dynamically runs the target in the selected environment profile.
 .PHONY: devind-target-runner
-devind-target-runner:
-	$(eval DEVIND_DEVTARGET := $(call devtarget_for_goal,$(GOAL)))
-	$(eval include $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk)
+devind-target-runner: $(DEV_TARGET_FILE)
+	$(eval include $^)
 
 	$(info [EXEC] Running make target `$(GOAL)` in devtarget: $(DEVIND_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) "$(GOAL)" $(CMD_SUFFIX)
