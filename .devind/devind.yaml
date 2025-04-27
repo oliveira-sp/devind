@@ -21,7 +21,7 @@ devtargets:
   local:
     CMD_PREFIX: $(CMD_EXEC)
 
-  docker-build:
+  docker:
     profiles:
       - docker
       - docker-remove
@@ -33,5 +33,6 @@ devtargets:
     CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
 
 goals:
-  build-*: dev-docker-build
-  b: dev-docker-build profile-dummy
+  a b c: dev-docker
+  d e f: dev-local
+  
