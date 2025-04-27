@@ -1,0 +1,2 @@
+DEVIND_DEVTARGET:=dev_local
+CMD_PREFIX:=$(CMD_EXEC)
