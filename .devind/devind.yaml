@@ -33,6 +33,9 @@ devtargets:
     CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
 
 goals:
-  a b c: dev-docker
-  d e f: dev-local
-  
+  a: dev-docker
+  b: dev-docker
+  c: dev-docker
+  d: dev-local
+  e: dev-local
+  f: dev-local
