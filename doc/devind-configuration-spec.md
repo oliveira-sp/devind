@@ -54,7 +54,7 @@ devtargets:                    # Required. Define devtargets that map to executi
     CMD_SUFFIX: value          # Optional. Command suffix added after the Makefile goal.
 
 goals:                         # Required. Map Makefile targets to devtargets or profiles.
-  make_target: devtarget profile ...   # Goal mappings to devtargets or profiles.
+  make_target: devtarget       # Goal mappings to a devtarget.
 ```
 
 ---
@@ -124,13 +124,13 @@ devtargets:
 ```
 
 ### **goals**
-The `goals` section maps Makefile targets to devtargets or profiles. This mapping determines which devtarget or profile is executed when a Makefile goal is triggered.
+The `goals` section maps Makefile targets to devtargets. This mapping determines which devtarget is executed when a Makefile goal is triggered.
 
 Example:
 ```yaml
 goals:
   build-*: dev-docker-build  # All build-* targets map to dev-docker-build
-  b: dev-docker-build profile-dummy  # Goal "b" uses the "dev-docker-build" devtarget with "profile-dummy".
+  b: dev-docker-build  # Goal "b" uses the "dev-docker-build" devtarget.
 ```
 
 ---
@@ -232,7 +232,7 @@ devtargets:
 
 goals:
   build-*: dev-docker-build
-  b: dev-docker-build profile-dummy
+  b: dev-docker-build
 ```
 
 ---
@@ -243,7 +243,7 @@ This specification outlines the structure and usage of the YAML configuration fi
 
 - **Profiles**: Reusable setups that can be inherited by devtargets.
 - **Devtargets**: Specific execution environments that map to Makefile targets.
-- **Goals**: Mappings of Makefile targets to devtargets or profiles.
+- **Goals**: Mappings of Makefile targets to devtargets.
 - **Variable Assignment**: Supports Makefile-like variable assignments and appending using the `+` syntax.
 
 By following this structure, you can efficiently manage and customize your development environments, ensuring that different execution contexts can be easily defined and reused.
