@@ -22,7 +22,8 @@
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEVIND_FOLDER ?= .devind
 
--include $(wildcard $(DEVIND_FOLDER)/*.mk)
+# Include devtarget mapping
+include $(DEVIND_FOLDER)/devtargets.mk
 
 # Verbosity selection
 ifeq ($(V),1)
@@ -30,6 +31,8 @@ QUIET :=
 else
 QUIET := @
 endif
+
+.DEFAULT_GOAL := generate
 
 # Devind Folder Creation
 $(DEVIND_FOLDER):
@@ -40,7 +43,25 @@ $(DEVIND_FOLDER):
 .PHONY: configure-devind
 configure-devind: | $(DEVIND_FOLDER)
 
-# Running goals on configured dev target 
-%: | $(DEVIND_DEVTARGET)
-	$(info [EXEC] Running make target `$@` in devtarget: $(DEVIND_DEVTARGET))
-	$(QUIET) $(CMD_PREFIX) "$@" $(CMD_SUFFIX)
+.PHONY: generate
+generate:
+	@true
+	$(info [CONF] Generating DevinD definition Makefile)
+
+# --- Target runner for DevTarget ---
+# This rule dynamically runs the target in the selected environment profile.
+.PHONY: devind-target-runner
+devind-target-runner:
+	$(eval DEVIND_DEVTARGET := $(call devtarget_for_goal,$(GOAL)))
+	$(eval include $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk)
+
+	$(info [EXEC] Running make target `$(GOAL)` in devtarget: $(DEVIND_DEVTARGET))
+	$(QUIET) $(CMD_PREFIX) "$(GOAL)" $(CMD_SUFFIX)
+
+
+# Rule to run goals on the configured dev target
+# Each goal runs the internal target runner, setting necessary variables and invoking the appropriate profile
+%:
+	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) devind-target-runner GOAL=$@ \
+		DEVIND_MAKEFILE_ENTRY=$(DEVIND_MAKEFILE_ENTRY) \
+		DEVIND_FOLDER=$(DEVIND_FOLDER)
