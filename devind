@@ -1,4 +1,4 @@
-#!/usr/bin/make -f
+#!make -f
 #------------------------------------------------------------------------------
 # DevinD Makefile
 #------------------------------------------------------------------------------
@@ -55,8 +55,15 @@ define fetch_goal_devtarget
 endef
 
 DEVIND_DEVTARGET := $(strip $(call fetch_goal_devtarget,$(GOAL)))
-DEV_TARGET_FILE:= $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
 
+ifneq ($(strip $(DEVIND_DEVTARGET)),)
+DEV_TARGET_FILE= $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
+endif
+
+# --- Rule to generate .mk files ---
+dev-%.mk: $(DEVIND_YAML_FILE)
+	$(info [CONF] Generating DevinD Devtarget Makefile: $@)
+	$(QUIET)touch $@
 
 # --- Target runner for DevTarget ---
 # This rule dynamically runs the target in the selected environment profile.
