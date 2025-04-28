@@ -54,10 +54,32 @@ define fetch_goal_devtarget
   $(shell awk '/goals:/ {flag=1} flag && $$1 == "$(1):" {gsub(/^[ \t]+|[ \t]+$$/, "", $$2); print $$2; flag=0} flag && /^[^ ]/ && $$1 != "goals:" {flag=0}' $(DEVIND_YAML_FILE))
 endef
 
-DEVIND_DEVTARGET := $(strip $(call fetch_goal_devtarget,$(GOAL)))
+# Check GOAL and DEVIND_DEVTARGET for devind-target-runner. Fail early on error.
+ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
 
-ifneq ($(strip $(DEVIND_DEVTARGET)),)
-DEV_TARGET_FILE= $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
+    # Validate that GOAL is set
+    ifeq ($(strip $(GOAL)),)
+        $(error [ERROR] GOAL variable must be set when calling `devind-target-runner`)
+    endif
+
+    # Retrieve target's devtarget
+    DEVIND_DEVTARGET := $(strip $(call fetch_goal_devtarget,$(GOAL)))
+
+    # If no devtarget found, attempt to use the default from YAML
+    ifeq ($(strip $(DEVIND_DEVTARGET)),)
+        $(info [INFO] No devtarget found for GOAL `$(GOAL)`, attempting to assign default devtarget from: '$(DEVIND_YAML_FILE)')
+
+        DEVIND_DEVTARGET := $(strip $(shell awk '/default_devtarget:/ {print $$2; exit;}' $(DEVIND_YAML_FILE)))
+
+        ifeq ($(strip $(DEVIND_DEVTARGET)),)
+            $(error [ERROR] No `default_devtarget` defined in YAML file, cannot define devtarget for GOAL: `$(GOAL)`)
+        else
+            $(info [CONF] Default devtarget `$(DEVIND_DEVTARGET)` assigned to GOAL: `$(GOAL)`)
+        endif
+    endif
+
+    # Compute path to environment file
+    DEV_TARGET_FILE := $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
 endif
 
 # --- Rule to generate .mk files ---
