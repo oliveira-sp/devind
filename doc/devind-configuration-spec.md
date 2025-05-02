@@ -50,8 +50,8 @@ devtargets:                    # Required. Define devtargets that map to executi
     var:                       # Optional. Additional variables specific to this devtarget.
       VAR: value
       VAR+: value
-    CMD_PREFIX: value          # Required. Command prefix used to execute the target.
-    CMD_SUFFIX: value          # Optional. Command suffix added after the Makefile goal.
+      CMD_PREFIX: value        # Required. Command prefix used to execute the target.
+      CMD_SUFFIX: value        # Optional. Command suffix added after the Makefile goal.
 
 goals:                         # Required. Map Makefile targets to devtargets or profiles.
   make_target: devtarget       # Goal mappings to a devtarget.
@@ -102,7 +102,7 @@ profiles:
 Devtargets are **required** and define specific execution environments like local, Docker, or SSH. A devtarget can:
 - Inherit one or more profiles.
 - Define its own variables.
-- Specify `CMD_PREFIX` (mandatory) and `CMD_SUFFIX` (optional) for how the target will be executed.
+  - Specify `CMD_PREFIX` (mandatory) and `CMD_SUFFIX` (optional) for how the target will be executed.
 
 **Important Note**: `CMD_PREFIX` is required for every devtarget. However, if it is already defined in an inherited profile (e.g., `docker`), it **does not need to be redefined** in the devtarget. Only if `CMD_PREFIX` is not defined in the inherited profile(s), it should be specified within the devtarget.
 
@@ -120,7 +120,7 @@ devtargets:
     var:
       DOCKER_NAME: my-docker-build-container
       DOCKER_OPT+: --name $(DOCKER_NAME)
-    CMD_SUFFIX: -f Dockerfile  # Optional; defined here if needed, otherwise inherited from profiles.
+      CMD_SUFFIX: -f Dockerfile  # Optional; defined here if needed, otherwise inherited from profiles.
 ```
 
 ### **goals**
@@ -187,7 +187,6 @@ Although `:=` is used internally (immediate expansion), the order in which value
 1. **Global variables** (`global:`) are evaluated first and are visible to all profiles and devtargets.
 2. **Profiles** are processed next and may override or append to global variables.
 3. **Devtarget variables** (`devtargets[*].var:`) are applied after profiles and can rely on globals and profiles.
-4. **`CMD_PREFIX` and `CMD_SUFFIX`** are expanded **last**, allowing them to reference all other variables safely—even those defined in profiles or devtargets.
 
 ---
 
@@ -217,7 +216,8 @@ profiles:
 
 devtargets:
   local:
-    CMD_PREFIX: $(CMD_EXEC)
+    var:
+      CMD_PREFIX: $(CMD_EXEC)
 
   docker-build:
     profiles:
@@ -228,7 +228,7 @@ devtargets:
     var:
       DOCKER_NAME: my-docker-build-container
       DOCKER_OPT+: --name $(DOCKER_NAME)
-    CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
+      CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
 
 goals:
   build-*: dev-docker-build

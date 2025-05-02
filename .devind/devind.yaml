@@ -12,14 +12,15 @@ profiles:
   docker-remove:
     DOCKER_OPT+: --rm
   docker-bind-workspace:
-	  DOCKER_OPT+: -v .:/home/dev
-	  DOCKER_OPT+: -w /home/dev
+    DOCKER_OPT+: -v .:/home/dev
+    DOCKER_OPT+: -w /home/dev
   dummy:
     DUMMY_VAR: $(FOO)
 
 devtargets:
   local:
-    CMD_PREFIX: $(CMD_EXEC)
+    var:
+      CMD_PREFIX: $(CMD_EXEC)
 
   docker:
     profiles:
@@ -30,7 +31,7 @@ devtargets:
     var:
       DOCKER_NAME: my-docker-build-container
       DOCKER_OPT+: --name $(DOCKER_NAME)
-    CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
+      CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE) $(CMD_EXEC)
 
 goals:
   a: dev-docker
