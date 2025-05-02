@@ -48,7 +48,7 @@ function parse_key_value(line,   pos) {
     current_key = keys[current_key_depth + 1]
 
     # Current Key not found when stepping outside its own depth
-    if (line_depth < current_key_depth) exit 1
+    if (line_depth < current_key_depth) exit 0
 
     if (!target_key_found)
     {
