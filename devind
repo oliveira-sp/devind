@@ -22,9 +22,7 @@
 DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
 DEVIND_FOLDER ?= .devind
 DEVIND_YAML_FILE ?= $(DEVIND_FOLDER)/devind.yaml
-
-# Include devtarget mapping
-include $(DEVIND_FOLDER)/devtargets.mk
+YAML_TOOL       := $(DEVIND_FOLDER)/devind_yaml_parser.awk
 
 # Verbosity selection
 ifeq ($(V),1)
@@ -49,9 +47,16 @@ generate:
 	@true
 	$(info [CONF] Generating DevinD definition Makefile)
 
-# Define the function to fetch the goal value from the YAML file with trimming
-define fetch_goal_devtarget
-  $(shell awk '/goals:/ {flag=1} flag && $$1 == "$(1):" {gsub(/^[ \t]+|[ \t]+$$/, "", $$2); print $$2; flag=0} flag && /^[^ ]/ && $$1 != "goals:" {flag=0}' $(DEVIND_YAML_FILE))
+define get_goal_devtarget
+  $(shell $(YAML_TOOL) value goals $(1) < $(DEVIND_YAML_FILE))
+endef
+
+define get_default_devtarget
+  $(shell $(YAML_TOOL) value default_devtarget < $(DEVIND_YAML_FILE))
+endef
+
+define get_devtarget_profiles
+  $(shell $(YAML_TOOL) list devtargets $(1) profiles < $(DEVIND_YAML_FILE))
 endef
 
 # Check GOAL and DEVIND_DEVTARGET for devind-target-runner. Fail early on error.
@@ -63,29 +68,32 @@ ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
     endif
 
     # Retrieve target's devtarget
-    DEVIND_DEVTARGET := $(strip $(call fetch_goal_devtarget,$(GOAL)))
+    DEVIND_DEVTARGET := $(strip $(call get_goal_devtarget, $(GOAL)))
 
-    # If no devtarget found, attempt to use the default from YAML
-    ifeq ($(strip $(DEVIND_DEVTARGET)),)
-        $(info [INFO] No devtarget found for GOAL `$(GOAL)`, attempting to assign default devtarget from: '$(DEVIND_YAML_FILE)')
+    ifeq ($(DEVIND_DEVTARGET),)
+    # Compute path to environment file
+        DEVIND_DEVTARGET := $(strip $(call get_default_devtarget))
 
-        DEVIND_DEVTARGET := $(strip $(shell awk '/default_devtarget:/ {print $$2; exit;}' $(DEVIND_YAML_FILE)))
-
-        ifeq ($(strip $(DEVIND_DEVTARGET)),)
-            $(error [ERROR] No `default_devtarget` defined in YAML file, cannot define devtarget for GOAL: `$(GOAL)`)
+        ifeq ($(DEVIND_DEVTARGET),)
+            $(error [ERROR] No default devtarget found to set to unmapped `$(GOAL)` goal)
         else
-            $(info [CONF] Default devtarget `$(DEVIND_DEVTARGET)` assigned to GOAL: `$(GOAL)`)
+            $(info [CONF] No devtarget found for `$(GOAL)`, setting up default devtarget: `$(DEVIND_DEVTARGET)`)
         endif
     endif
 
-    # Compute path to environment file
+    DEVTARGET:= $(subst dev-,,$(DEVIND_DEVTARGET))
+    DEVTARGET_PREREQUISITES:= $(patsubst %,$(DEVIND_FOLDER)/env/profile-%.mk,$(call get_devtarget_profiles,$(DEVTARGET)))
     DEV_TARGET_FILE := $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
 endif
 
 # --- Rule to generate .mk files ---
-dev-%.mk: $(DEVIND_YAML_FILE)
+$(DEVIND_FOLDER)/env/profile-%.mk: $(DEVIND_YAML_FILE)
+	$(info [CONF] Generating DevinD Profile Makefile: $@)
+	@touch $@
+
+$(DEVIND_FOLDER)/env/dev-%.mk: $(DEVTARGET_PREREQUISITES) $(DEVIND_YAML_FILE)
 	$(info [CONF] Generating DevinD Devtarget Makefile: $@)
-	$(QUIET)touch $@
+	@touch $@
 
 # --- Target runner for DevTarget ---
 # This rule dynamically runs the target in the selected environment profile.
