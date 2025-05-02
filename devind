@@ -31,6 +31,9 @@ else
 QUIET := @
 endif
 
+DOCKER_IMAGE:= example/devind:1.0
+CMD_EXEC:= make -f $(DEVIND_MAKEFILE_ENTRY)
+
 .DEFAULT_GOAL := generate
 
 # Devind Folder Creation
@@ -59,9 +62,6 @@ define get_devtarget_profiles
   $(shell $(YAML_TOOL) list devtargets $(1) profiles < $(DEVIND_YAML_FILE))
 endef
 
-define generate_profile_vars
-  $(shell $(YAML_TOOL) vars profiles $(1) < $(DEVIND_YAML_FILE))
-endef
 
 # Check GOAL and DEVIND_DEVTARGET for devind-target-runner. Fail early on error.
 ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
@@ -94,11 +94,21 @@ endif
 .PRECIOUS: $(DEVIND_FOLDER)/env/profile-%.mk
 $(DEVIND_FOLDER)/env/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(info [CONF] Generating DevinD Profile Makefile: $@)
-	$(QUIET)echo $(call generate_profile_vars,$*) > $@
+#	$(QUIET)echo "# Auto-generated makefile " >> $@
+#	$(QUIET)$(call generate_profile_vars,$*,$@)
+	$(QUIET){ \
+		echo "# Auto-generated makefile "; \
+		$(YAML_TOOL) vars profiles $* < $(DEVIND_YAML_FILE); \
+	} > $@
 
+.PRECIOUS: $(DEVIND_FOLDER)/env/dev-%.mk
 $(DEVIND_FOLDER)/env/dev-%.mk: $(DEVTARGET_PREREQUISITES) $(DEVIND_YAML_FILE)
 	$(info [CONF] Generating DevinD Devtarget Makefile: $@)
-	@touch $@
+	$(QUIET){ \
+		echo "# Auto-generated makefile "; \
+		echo "include $(DEVTARGET_PREREQUISITES)"; \
+		$(YAML_TOOL) vars devtargets $* var < $(DEVIND_YAML_FILE); \
+	} > $@
 
 # --- Target runner for DevTarget ---
 # This rule dynamically runs the target in the selected environment profile.
