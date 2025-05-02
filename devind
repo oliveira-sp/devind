@@ -31,9 +31,6 @@ else
 QUIET := @
 endif
 
-DOCKER_IMAGE:= example/devind:1.0
-CMD_EXEC:= make -f $(DEVIND_MAKEFILE_ENTRY)
-
 .DEFAULT_GOAL := generate
 
 # Devind Folder Creation
@@ -91,6 +88,14 @@ ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
 endif
 
 # --- Rule to generate .mk files ---
+.PRECIOUS: $(DEVIND_FOLDER)/env/global.mk
+$(DEVIND_FOLDER)/env/global.mk: $(DEVIND_YAML_FILE)
+	$(info [CONF] Generating DevinD Global Makefile: $@)
+	$(QUIET){ \
+		echo "# Auto-generated makefile "; \
+		$(YAML_TOOL) vars global < $(DEVIND_YAML_FILE); \
+	} > $@
+
 .PRECIOUS: $(DEVIND_FOLDER)/env/profile-%.mk
 $(DEVIND_FOLDER)/env/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(info [CONF] Generating DevinD Profile Makefile: $@)
@@ -113,7 +118,7 @@ $(DEVIND_FOLDER)/env/dev-%.mk: $(DEVTARGET_PREREQUISITES) $(DEVIND_YAML_FILE)
 # --- Target runner for DevTarget ---
 # This rule dynamically runs the target in the selected environment profile.
 .PHONY: devind-target-runner
-devind-target-runner: $(DEV_TARGET_FILE)
+devind-target-runner: $(DEVIND_FOLDER)/env/global.mk $(DEV_TARGET_FILE)
 	$(eval include $^)
 
 	$(info [EXEC] Running make target `$(GOAL)` in devtarget: $(DEVIND_DEVTARGET))
