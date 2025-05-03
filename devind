@@ -20,10 +20,11 @@
 #------------------------------------------------------------------------------
 
 # Configuration ---------------------------------------------------------------
-DEVIND_MAKEFILE_ENTRY ?= example/hello-world/Makefile
-DEVIND_FOLDER ?= .devind
-DEVIND_YAML_FILE ?= $(DEVIND_FOLDER)/devind.yaml
-YAML_TOOL       := $(DEVIND_FOLDER)/devind_yaml_parser.awk
+DEVIND_MAKEFILE_ENTRY 		?= example/hello-world/Makefile
+DEVIND_FOLDER 				?= .devind
+DEVIND_GENERATE_FOLDER		?= $(DEVIND_FOLDER)/env
+DEVIND_YAML_FILE 			?= $(DEVIND_FOLDER)/devind.yaml
+YAML_TOOL       			?= $(DEVIND_FOLDER)/devind_yaml_parser.awk
 
 # Verbosity -------------------------------------------------------------------
 ifeq ($(V),1)
@@ -96,13 +97,13 @@ ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
 
   DEVTARGET := $(subst dev-,,$(DEVIND_DEVTARGET))
   DEVTARGET_PROFILES := $(call get_devtarget_profiles,$(DEVTARGET))
-  DEVTARGET_PROFILE_FILES := $(patsubst %,$(DEVIND_FOLDER)/env/profile-%.mk,$(DEVTARGET_PROFILES))
-  DEV_TARGET_FILE := $(DEVIND_FOLDER)/env/$(DEVIND_DEVTARGET).mk
+  DEVTARGET_PROFILE_FILES := $(patsubst %,$(DEVIND_GENERATE_FOLDER)/profile-%.mk,$(DEVTARGET_PROFILES))
+  DEV_TARGET_FILE := $(DEVIND_GENERATE_FOLDER)/$(DEVIND_DEVTARGET).mk
 endif
 
 # Rule to Generate: Global Variable Makefile (global.mk) ----------------
-.PRECIOUS: $(DEVIND_FOLDER)/env/global.mk
-$(DEVIND_FOLDER)/env/global.mk: $(DEVIND_YAML_FILE)
+.PRECIOUS: $(DEVIND_GENERATE_FOLDER)/global.mk
+$(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Global Makefile: $@)
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
@@ -112,8 +113,8 @@ $(DEVIND_FOLDER)/env/global.mk: $(DEVIND_YAML_FILE)
 	} > $@
 
 # Rule to Generate: Profile Variable Makefile (profile-%.mk) ----------------
-.PRECIOUS: $(DEVIND_FOLDER)/env/profile-%.mk
-$(DEVIND_FOLDER)/env/profile-%.mk: $(DEVIND_YAML_FILE)
+.PRECIOUS: $(DEVIND_GENERATE_FOLDER)/profile-%.mk
+$(DEVIND_GENERATE_FOLDER)/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Profile Makefile: $@)
 	
 	$(QUIET){ \
@@ -124,8 +125,8 @@ $(DEVIND_FOLDER)/env/profile-%.mk: $(DEVIND_YAML_FILE)
 	} > $@
 
 # Rule to Generate: Devtarget Makefile (dev-%.mk) -----------------------------
-.PRECIOUS: $(DEVIND_FOLDER)/env/dev-%.mk
-$(DEVIND_FOLDER)/env/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FILE)
+.PRECIOUS: $(DEVIND_GENERATE_FOLDER)/dev-%.mk
+$(DEVIND_GENERATE_FOLDER)/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Devtarget Makefile: $@)
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
@@ -140,7 +141,7 @@ $(DEVIND_FOLDER)/env/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FILE)
 
 # Target Runner (includes all environment data and runs target) ---------------
 .PHONY: devind-target-runner
-devind-target-runner: $(DEVIND_FOLDER)/env/global.mk $(DEV_TARGET_FILE)
+devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(DEV_TARGET_FILE)
 	$(eval include $^)
 	$(info [EXEC] Running make target `$(GOAL)` in devtarget: $(DEVIND_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) "$(GOAL)" $(CMD_SUFFIX)
