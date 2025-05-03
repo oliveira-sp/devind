@@ -49,15 +49,18 @@ $(DEVIND_FOLDER): # Devind Folder Creation
 	$(info [CONF] Creating DevinD folder: $@)
 	$(QUIET)mkdir $@
 
-# Configure devind
 .PHONY: configure-devind
 configure-devind: | $(DEVIND_FOLDER) ## Interactive Devind Configuration 
 
-.PHONY: generate
-generate:
-	@true
-	$(info [CONF] Generating DevinD definition Makefile)
+.PHONY: force-gen
+force-gen: ## Force Makefiles Re-Generation by updating timestamp of yaml config file
+	$(info [CONF] Forcing All Makefiles Re-Generation.)
+	$(QUIET)touch $(DEVIND_YAML_FILE)
 
+.PHONY: clean-gen
+clean-gen: ## Cleaning All Generated Makefiles
+	$(info [CLEAN] Removing All Generated Makefiles.)
+	$(QUIET) rm -rf $(DEVIND_GENERATE_FOLDER)/*.mk
 
 # YAML Query Helpers ----------------------------------------------------------
 define get_goal_devtarget
