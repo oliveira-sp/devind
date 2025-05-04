@@ -63,6 +63,13 @@ clean-gen: ## Cleaning All Generated Makefiles
 	$(info [CLEAN] Removing All Generated Makefiles.)
 	$(QUIET) rm -rf $(DEVIND_GENERATE_FOLDER)/*.mk
 
+.PHONY: help
+help: ## Display this help
+	$(QUIET)echo Usage: ./devind [options] [target]
+	$(QUIET)echo Devind Targets:
+	$(QUIET)grep -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[34m  %-30s\033[0m %s\n", $$1, $$2}'
+
+
 # YAML Query Helpers ----------------------------------------------------------
 define get_goal_devtarget
   $(shell $(YAML_TOOL) value goals $(1) < $(DEVIND_YAML_FILE))
