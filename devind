@@ -63,6 +63,16 @@ clean-gen: ## Cleaning All Generated Makefiles
 	$(info [CLEAN] Removing All Generated Makefiles.)
 	$(QUIET) rm -rf $(DEVIND_GENERATE_FOLDER)/*.mk
 
+.PHONY: profiles
+profiles: ## List all profiles defined the YAML config file
+	$(QUIET)echo DevinD Profiles available:
+	$(QUIET)for line in $(call get_profiles); do echo "  $$line"; done;
+
+.PHONY: devtargets
+devtargets: ## List all devtargets defined the YAML config file
+	$(QUIET)echo DevinD Devtargets available:
+	$(QUIET)for line in $(call get_devtargets); do echo "  $$line"; done;
+
 .PHONY: help
 help: ## Display this help
 	$(QUIET)echo Usage: ./devind [options] [target]
@@ -81,6 +91,14 @@ endef
 
 define get_devtarget_profiles
   $(shell $(YAML_TOOL) list devtargets $(1) profiles < $(DEVIND_YAML_FILE))
+endef
+
+define get_profiles
+  $(shell $(YAML_TOOL) node profiles < $(DEVIND_YAML_FILE))
+endef
+
+define get_devtargets
+  $(shell $(YAML_TOOL) node devtargets < $(DEVIND_YAML_FILE))
 endef
 
 # DevTarget Evaluation (only evaluated when devind-target-runner is called) ---

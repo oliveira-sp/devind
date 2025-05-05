@@ -8,7 +8,7 @@
 
 BEGIN {
     mode = ARGV[1]
-    if (mode != "value" && mode != "list" && mode != "vars") {
+    if (mode != "value" && mode != "list" && mode != "vars" && mode != "node") {
         print "Invalid mode: " mode > "/dev/stderr"
         exit 1
     }
@@ -32,7 +32,7 @@ function trim(s)  { return rtrim(ltrim(s)) }
 # Extract key and value from a YAML line; sets k and v
 function parse_key_value(line,   pos) {
     pos = index(line, ":")
-    if (pos <= 0 || (pos +  1 >= length(line))) return 0
+    if (pos <= 0) return 0
     k = substr(line, 1, pos - 1)
     v = trim(substr(line, pos + 1))
     return 1
@@ -77,6 +77,11 @@ function parse_key_value(line,   pos) {
      # Now inside matched block
     if (mode == "list" && substr(content, 1, 2) == "- ") {
         print substr(content, 3)
+    }
+    else if (mode == "node" && line_depth == current_key_depth)
+    {
+        parse_key_value(content)
+        print k
     }
     else if (mode == "vars") {
         if (parse_key_value(content)) {
