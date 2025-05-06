@@ -50,10 +50,9 @@ define DEVIND_GENERATED_HEADER_LINES
 endef
 
 # Rules: DevinD Entry Points --------------------------------------------------
-
-$(DEVIND_FOLDER): # Devind Folder Creation
+$(DEVIND_FOLDER) $(DEVIND_GENERATE_FOLDER): # Devind Folder Creation
 	$(info [CONF] Creating DevinD folder: $@)
-	$(QUIET)mkdir $@
+	$(QUIET)mkdir -p $@
 
 .PHONY: configure-devind
 configure-devind:
