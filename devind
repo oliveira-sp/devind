@@ -107,7 +107,7 @@ define get_devtargets
 endef
 
 # DevTarget Evaluation (only evaluated when devind-target-runner is called) ---
-ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
+ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
 
   ifeq ($(strip $(GOAL)),)
     $(error [ERROR] GOAL variable must be set for `devind-target-runner`)
