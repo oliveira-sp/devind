@@ -49,11 +49,12 @@ define DEVIND_GENERATED_HEADER_LINES
 "#------------------------------------------------------------------------------"
 endef
 
-# Rules: DevinD Entry Points --------------------------------------------------
+# Rules: DevinD Folders Creation ----------------------------------------------
 $(DEVIND_FOLDER) $(DEVIND_GENERATE_FOLDER): # Devind Folder Creation
 	$(info [CONF] Creating DevinD folder: $@)
 	$(QUIET)mkdir -p $@
 
+# Rules: DevinD Entry Points --------------------------------------------------
 .PHONY: configure-devind
 configure-devind:
 	$(QUIET)echo "[CONF] Starting DevinD interactive environment configuration..."
@@ -160,9 +161,10 @@ ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
   DEV_TARGET_FILE := $(DEVIND_GENERATE_FOLDER)/$(DEVIND_DEVTARGET).mk
 endif
 
-# Rule to Generate: Global Variable Makefile (global.mk) ----------------
+# Folder Pre-requisites for Generated Makefile --------------------------------
 $(DEVIND_GENERATE_FOLDER)/*.mk: | $(DEVIND_GENERATE_FOLDER)
 
+# Rule to Generate: Global Variable Makefile (global.mk) ----------------------
 .PRECIOUS: $(DEVIND_GENERATE_FOLDER)/global.mk
 $(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Global Makefile: $@)
@@ -173,7 +175,7 @@ $(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE)
 		$(YAML_TOOL) vars global < $(DEVIND_YAML_FILE); \
 	} > $@
 
-# Rule to Generate: Profile Variable Makefile (profile-%.mk) ----------------
+# Rule to Generate: Profile Variable Makefile (profile-%.mk) ------------------
 .PRECIOUS: $(DEVIND_GENERATE_FOLDER)/profile-%.mk
 $(DEVIND_GENERATE_FOLDER)/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Profile Makefile: $@)
