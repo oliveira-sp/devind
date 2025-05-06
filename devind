@@ -59,7 +59,7 @@ configure-devind:
 	$(QUIET)echo "[CONF] Starting DevinD interactive environment configuration..."
 	$(QUIET){ \
 	if [ -f .devindrc ]; then \
-		read -p "  \`.devindrc\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
+		read -p "> \`.devindrc\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
 		overwrite=$${overwrite}; \
 		if [ "$$overwrite" != "y" ]; then \
 			echo "[WARN] Aborting configuration. \`.devindrc\` not modified."; \
@@ -67,13 +67,13 @@ configure-devind:
 		fi; \
 		echo "[INFO] Overwriting \`.devindrc\` ..."; \
 	fi;\
-		read -p "  Enter the folder name for DevinD (default: .devind): " devind_folder; \
-		devind_folder=$${devind_folder:-.devind}; \
+		read -p "> Enter the folder name for DevinD (default: $(DEVIND_FOLDER)): " devind_folder; \
+		devind_folder=$${devind_folder:-$(DEVIND_FOLDER)}; \
 		\
-		read -p "  Enter the path to the Makefile (default: example/hello-world/Makefile): " devind_makefile_entry; \
-		devind_makefile_entry=$${devind_makefile_entry:-example/hello-world/Makefile}; \
+		read -p "> Enter the path to the Makefile (default: $(DEVIND_MAKEFILE_ENTRY)): " devind_makefile_entry; \
+		devind_makefile_entry=$${devind_makefile_entry:-$(DEVIND_MAKEFILE_ENTRY)}; \
 		\
-		read -p "  Enter the path to the YAML file (default: $$devind_folder/devind.yaml): " devind_yaml_file; \
+		read -p "> Enter the path to the YAML file (default: $$devind_folder/devind.yaml): " devind_yaml_file; \
 		devind_yaml_file=$${devind_yaml_file:-$$devind_folder/devind.yaml}; \
 		\
 		echo "[CONF] Writing to .devindrc..."; \
