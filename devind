@@ -19,6 +19,11 @@
 # - Supports execution in various environments defined in `devind.yaml`.
 #------------------------------------------------------------------------------
 
+# Including DevinD configuration ----------------------------------------------
+ifneq ("$(wildcard .devindrc)","")
+include .devindrc
+endif
+
 # Configuration ---------------------------------------------------------------
 DEVIND_MAKEFILE_ENTRY 		?= example/hello-world/Makefile
 DEVIND_FOLDER 				?= .devind
