@@ -56,7 +56,37 @@ $(DEVIND_FOLDER): # Devind Folder Creation
 	$(QUIET)mkdir $@
 
 .PHONY: configure-devind
-configure-devind: | $(DEVIND_FOLDER) ## Interactive Devind Configuration 
+configure-devind:
+	$(QUIET)echo "[CONF] Starting DevinD interactive environment configuration..."
+	$(QUIET){ \
+	if [ -f .devindrc ]; then \
+		read -p "  \`.devindrc\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
+		overwrite=$${overwrite}; \
+		if [ "$$overwrite" != "y" ]; then \
+			echo "[WARN] Aborting configuration. \`.devindrc\` not modified."; \
+			exit 1; \
+		fi; \
+		echo "[INFO] Overwriting \`.devindrc\` ..."; \
+	fi;\
+		read -p "  Enter the folder name for DevinD (default: .devind): " devind_folder; \
+		devind_folder=$${devind_folder:-.devind}; \
+		\
+		read -p "  Enter the path to the Makefile (default: example/hello-world/Makefile): " devind_makefile_entry; \
+		devind_makefile_entry=$${devind_makefile_entry:-example/hello-world/Makefile}; \
+		\
+		read -p "  Enter the path to the YAML file (default: $$devind_folder/devind.yaml): " devind_yaml_file; \
+		devind_yaml_file=$${devind_yaml_file:-$$devind_folder/devind.yaml}; \
+		\
+		echo "[CONF] Writing to .devindrc..."; \
+		{ \
+			echo "# Auto-Generated DevinD Configuration File"; \
+			echo "DEVIND_MAKEFILE_ENTRY ?= $$devind_makefile_entry"; \
+			echo "DEVIND_FOLDER ?= $$devind_folder"; \
+			echo "DEVIND_YAML_FILE ?= $$devind_yaml_file"; \
+		} > .devindrc ;\
+	};
+	$(QUIET)echo "[INFO] .devindrc written successfully."
+
 
 .PHONY: force-gen
 force-gen: ## Force Makefiles Re-Generation by updating timestamp of yaml config file
