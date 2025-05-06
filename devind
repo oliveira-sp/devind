@@ -161,6 +161,8 @@ ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
 endif
 
 # Rule to Generate: Global Variable Makefile (global.mk) ----------------
+$(DEVIND_GENERATE_FOLDER)/*.mk: | $(DEVIND_GENERATE_FOLDER)
+
 .PRECIOUS: $(DEVIND_GENERATE_FOLDER)/global.mk
 $(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Global Makefile: $@)
