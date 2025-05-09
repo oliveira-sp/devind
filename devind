@@ -54,20 +54,26 @@ $(DEVIND_FOLDER) $(DEVIND_GENERATE_FOLDER): # Devind Folder Creation
 	$(info [CONF] Creating DevinD folder: $@)
 	$(QUIET)mkdir -p $@
 
-# Rules: DevinD Entry Points --------------------------------------------------
-.PHONY: configure-devind
-configure-devind:
-	$(QUIET)echo "[CONF] Starting DevinD interactive environment configuration..."
+# Rule: .devindrc Overwrite Validation ----------------------------------------
+.PHONY: .devindrc
+.devindrc:
 	$(QUIET){ \
-	if [ -f .devindrc ]; then \
-		read -p "> \`.devindrc\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
+	if [ -f $@ ]; then \
+		read -p "> \`$@\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
 		overwrite=$${overwrite}; \
 		if [ "$$overwrite" != "y" ]; then \
-			echo "[WARN] Aborting configuration. \`.devindrc\` not modified."; \
+			echo "[WARN] Aborting configuration. \`$@\` not modified."; \
 			exit 1; \
 		fi; \
-		echo "[INFO] Overwriting \`.devindrc\` ..."; \
-	fi;\
+		echo "[INFO] Overwriting \`$@\` ..."; \
+	fi; \
+	}
+
+# Rules: DevinD Entry Points --------------------------------------------------
+.PHONY: configure-devind
+configure-devind: .devindrc
+	$(QUIET)echo "[CONF] Starting DevinD interactive environment configuration..."
+	$(QUIET){ \
 		read -p "> Enter the folder name for DevinD (default: $(DEVIND_FOLDER)): " devind_folder; \
 		devind_folder=$${devind_folder:-$(DEVIND_FOLDER)}; \
 		\
