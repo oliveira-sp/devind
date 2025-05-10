@@ -60,7 +60,7 @@ $(DEVIND_FOLDER) $(DEVIND_GENERATE_FOLDER): # Devind Folder Creation
 overwrite-devindrc:
 	$(QUIET){ \
 	if [ -f $(DEVINDRC_FILE) ]; then \
-		read -p "> \`$(DEVINDRC_FILE)\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
+		read -p "[CONF] \`$(DEVINDRC_FILE)\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
 		overwrite=$${overwrite}; \
 		if [ "$$overwrite" != "y" ]; then \
 			echo "[WARN] Aborting configuration. \`$(DEVINDRC_FILE)\` not modified."; \
@@ -73,18 +73,17 @@ overwrite-devindrc:
 # Rules: DevinD Entry Points --------------------------------------------------
 .PHONY: configure-devind
 configure-devind: overwrite-devindrc
-	$(QUIET)echo "[CONF] Starting DevinD interactive environment configuration..."
+	$(QUIET)echo "[INFO] Starting DevinD interactive environment configuration..."
 	$(QUIET){ \
-		read -p "> Enter the folder name for DevinD (default: $(DEVIND_FOLDER)): " devind_folder; \
+		read -p "[CONF] Enter the folder name for DevinD (default: $(DEVIND_FOLDER)): " devind_folder; \
 		devind_folder=$${devind_folder:-$(DEVIND_FOLDER)}; \
 		\
-		read -p "> Enter the path to the Makefile (default: $(DEVIND_MAKEFILE_ENTRY)): " devind_makefile_entry; \
+		read -p "[CONF] Enter the path to the Makefile (default: $(DEVIND_MAKEFILE_ENTRY)): " devind_makefile_entry; \
 		devind_makefile_entry=$${devind_makefile_entry:-$(DEVIND_MAKEFILE_ENTRY)}; \
 		\
-		read -p "> Enter the path to the YAML file (default: $$devind_folder/devind.yaml): " devind_yaml_file; \
+		read -p "[CONF] Enter the path to the YAML file (default: $$devind_folder/devind.yaml): " devind_yaml_file; \
 		devind_yaml_file=$${devind_yaml_file:-$$devind_folder/devind.yaml}; \
 		\
-		echo "[CONF] Writing to \`$(DEVINDRC_FILE)\` ..."; \
 		{ \
 			echo "# Auto-Generated DevinD Configuration File"; \
 			echo "DEVIND_MAKEFILE_ENTRY ?= $$devind_makefile_entry"; \
