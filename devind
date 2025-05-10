@@ -8,7 +8,7 @@
 #                without modifying the original Makefiles. Acts as a flexible
 #                buildflow orchestrator using environment-specific profiles.
 # Author       : Oliveira S.
-# Version      : NA
+# Version      : 0.1
 # License      : MIT
 # Repository   : https://gitlab.com/oliveira.s/devind
 #------------------------------------------------------------------------------
@@ -19,11 +19,17 @@
 # - Supports execution in various environments defined in `devind.yaml`.
 #------------------------------------------------------------------------------
 
+# Including DevinD configuration ----------------------------------------------
+DEVINDRC_FILE	:= $(wildcard .devindrc)
+ifneq ("$(DEVINDRC_FILE)","")
+include $(DEVINDRC_FILE)
+endif
+
 # Configuration ---------------------------------------------------------------
-DEVIND_MAKEFILE_ENTRY 		?= example/hello-world/Makefile
+DEVIND_MAKEFILE_ENTRY 		?= Makefile
 DEVIND_FOLDER 				?= .devind
-DEVIND_GENERATE_FOLDER		?= $(DEVIND_FOLDER)/env
-DEVIND_YAML_FILE 			?= $(DEVIND_FOLDER)/devind.yaml
+DEVIND_GENERATE_FOLDER		?= $(DEVIND_FOLDER)/generated
+DEVIND_YAML_FILE 			?= devind.yaml
 YAML_TOOL       			?= $(DEVIND_FOLDER)/devind_yaml_parser.awk
 
 # Verbosity -------------------------------------------------------------------
@@ -44,14 +50,49 @@ define DEVIND_GENERATED_HEADER_LINES
 "#------------------------------------------------------------------------------"
 endef
 
-# Rules: DevinD Entry Points --------------------------------------------------
-
-$(DEVIND_FOLDER): # Devind Folder Creation
+# Rules: DevinD Folders Creation ----------------------------------------------
+$(DEVIND_FOLDER) $(DEVIND_GENERATE_FOLDER): # Devind Folder Creation
 	$(info [CONF] Creating DevinD folder: $@)
-	$(QUIET)mkdir $@
+	$(QUIET)mkdir -p $@
 
+# Rule: .devindrc Overwrite Validation ----------------------------------------
+.PHONY: overwrite-devindrc
+overwrite-devindrc:
+	$(QUIET){ \
+	if [ -f $(DEVINDRC_FILE) ]; then \
+		read -p "[CONF] \`$(DEVINDRC_FILE)\` already exists! Do you want to overwrite it? (y/n): " overwrite; \
+		overwrite=$${overwrite}; \
+		if [ "$$overwrite" != "y" ]; then \
+			echo "[WARN] Aborting configuration. \`$(DEVINDRC_FILE)\` not modified."; \
+			exit 1; \
+		fi; \
+		echo "[INFO] Overwriting \`$(DEVINDRC_FILE)\` ..."; \
+	fi; \
+	}
+
+# Rules: DevinD Entry Points --------------------------------------------------
 .PHONY: configure-devind
-configure-devind: | $(DEVIND_FOLDER) ## Interactive Devind Configuration 
+configure-devind: overwrite-devindrc
+	$(QUIET)echo "[INFO] Starting DevinD interactive environment configuration..."
+	$(QUIET){ \
+		read -p "[CONF] Enter the folder name for DevinD (default: $(DEVIND_FOLDER)): " devind_folder; \
+		devind_folder=$${devind_folder:-$(DEVIND_FOLDER)}; \
+		\
+		read -p "[CONF] Enter the path to the Makefile (default: $(DEVIND_MAKEFILE_ENTRY)): " devind_makefile_entry; \
+		devind_makefile_entry=$${devind_makefile_entry:-$(DEVIND_MAKEFILE_ENTRY)}; \
+		\
+		read -p "[CONF] Enter the path to the YAML file (default: $$devind_folder/devind.yaml): " devind_yaml_file; \
+		devind_yaml_file=$${devind_yaml_file:-$$devind_folder/devind.yaml}; \
+		\
+		{ \
+			echo "# Auto-Generated DevinD Configuration File"; \
+			echo "DEVIND_MAKEFILE_ENTRY ?= $$devind_makefile_entry"; \
+			echo "DEVIND_FOLDER ?= $$devind_folder"; \
+			echo "DEVIND_YAML_FILE ?= $$devind_yaml_file"; \
+		} > $(DEVINDRC_FILE) ;\
+	};
+	$(QUIET)echo "[INFO] \`$(DEVINDRC_FILE)\` written successfully."
+
 
 .PHONY: force-gen
 force-gen: ## Force Makefiles Re-Generation by updating timestamp of yaml config file
@@ -102,7 +143,7 @@ define get_devtargets
 endef
 
 # DevTarget Evaluation (only evaluated when devind-target-runner is called) ---
-ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
+ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
 
   ifeq ($(strip $(GOAL)),)
     $(error [ERROR] GOAL variable must be set for `devind-target-runner`)
@@ -126,9 +167,9 @@ ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),devind-target-runner)
   DEV_TARGET_FILE := $(DEVIND_GENERATE_FOLDER)/$(DEVIND_DEVTARGET).mk
 endif
 
-# Rule to Generate: Global Variable Makefile (global.mk) ----------------
+# Rule to Generate: Global Variable Makefile (global.mk) ----------------------
 .PRECIOUS: $(DEVIND_GENERATE_FOLDER)/global.mk
-$(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE)
+$(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE) | $(DEVIND_GENERATE_FOLDER)
 	$(info [GEN] Generating DevinD Global Makefile: $@)
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
@@ -137,7 +178,7 @@ $(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE)
 		$(YAML_TOOL) vars global < $(DEVIND_YAML_FILE); \
 	} > $@
 
-# Rule to Generate: Profile Variable Makefile (profile-%.mk) ----------------
+# Rule to Generate: Profile Variable Makefile (profile-%.mk) ------------------
 .PRECIOUS: $(DEVIND_GENERATE_FOLDER)/profile-%.mk
 $(DEVIND_GENERATE_FOLDER)/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(info [GEN] Generating DevinD Profile Makefile: $@)
