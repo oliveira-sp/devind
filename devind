@@ -39,6 +39,21 @@ else
 QUIET := @
 endif
 
+# Logging definitions ---------------------------------------------------------
+WARN_TAG 	:= [\033[38;5;9mWARN\033[0m]
+INFO_TAG 	:= [INFO]
+ERROR_TAG	:= [\033[38;5;196mERROR\033[0m]
+DEBUG_TAG	:= [\033[38;5;5mDEBUG\033[0m]
+CONF_TAG	:= [\033[34mCONF\033[0m]
+GEN_TAG		:= [\033[34mGEN\033[0m]
+EXEC_TAG	:= [\033[34mEXEC\033[0m]
+
+define log
+$(if $(filter n,$3), \
+	$(QUIET)printf "$1 %s" $2, \
+	$(QUIET)printf "$1 %s\n" $2)
+endef
+
 # Generated Header (for .mk files) --------------------------------------------
 define DEVIND_GENERATED_HEADER_LINES
 "#------------------------------------------------------------------------------" \
