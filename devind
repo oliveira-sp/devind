@@ -40,14 +40,14 @@ QUIET := @
 endif
 
 # Logging definitions ---------------------------------------------------------
-WARN_TAG 	:= [\033[38;5;9mWARN\033[0m]
+WARN_TAG 	:= [\\033[38;5;9mWARN\\033[0m]
 INFO_TAG 	:= [INFO]
-ERROR_TAG	:= [\033[38;5;196mERROR\033[0m]
-DEBUG_TAG	:= [\033[38;5;5mDEBUG\033[0m]
-CONF_TAG	:= [\033[34mCONF\033[0m]
-GEN_TAG		:= [\033[34mGEN\033[0m]
-EXEC_TAG	:= [\033[34mEXEC\033[0m]
-CLEAN_TAG	:= [\033[38;5;28mCLEAN\033[0m]
+ERROR_TAG	:= [\\033[38;5;196mERROR\033[0m]
+DEBUG_TAG	:= [\\033[38;5;5mDEBUG\\033[0m]
+CONF_TAG	:= [\\033[34mCONF\\033[0m]
+GEN_TAG		:= [\\033[34mGEN\\033[0m]
+EXEC_TAG	:= [\\033[34mEXEC\\033[0m]
+CLEAN_TAG	:= [\\033[38;5;28mCLEAN\\033[0m]
 
 define log
 $(if $(filter n,$3), \
