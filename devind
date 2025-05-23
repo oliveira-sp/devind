@@ -49,12 +49,20 @@ GEN_TAG		:= [\\033[38;5;252mGEN\\033[0m]
 EXEC_TAG	:= [\\033[38;5;33mEXEC\\033[0m]
 CLEAN_TAG	:= [\\033[38;5;252mCLEAN\\033[0m]
 
-define log
+# log: print a log message with optional newline
+define log # $1 = tag, $2 = message, $3 = "n" for no newline
 if [ "$3" = "n" ]; then \
-  printf '%b %s\t' "$1" "$2"; \
+  printf '%b %s' "$1" "$2"; \
 else \
   printf '%b %s\n' "$1" "$2"; \
 fi
+endef
+
+# log_in_make: print log; if tag is ERROR_TAG, print to stderr and abort Make
+define log_in_make # usage: $(call log_in_make,<tag>,<message>,<newline_flag>)
+$(if $(filter $1,$(ERROR_TAG)),\
+  $(shell $(call log,$1,$2,$3) >&2) $(error Fatal error detected, aborting Make),\
+  $(shell $(call log,$1,$2,$3) >&0))
 endef
 
 # Generated Header (for .mk files) --------------------------------------------
