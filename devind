@@ -239,6 +239,7 @@ devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(DEV_TARGET_FILE)
 	$(eval include $^)
 	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(DEVIND_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) "$(GOAL)" $(CMD_SUFFIX)
+	$(QUIET)echo
 
 
 # Target Dispatcher: Default Goal Passthrough ---------------------------------
