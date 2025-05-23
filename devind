@@ -148,7 +148,7 @@ help: ## Display this help
 	$(QUIET)echo Usage: ./devind [options] [target]
 	$(QUIET)echo Devind Targets:
 	$(QUIET)grep -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk -F':' '{desc_pos = index($$0, "## "); if (desc_pos) { desc = substr($$0, desc_pos + 3); printf "  \033[34m%-20s\033[0m %s\n", $$2, desc; }}' | sort \
+		awk -F':' '{desc_pos = index($$0, "## "); if (desc_pos) { desc = substr($$0, desc_pos + 3); printf "  \033[34m%-20s\033[0m %s\n", $$2, desc; }}' | sort
 
 # YAML Query Helpers ----------------------------------------------------------
 define get_goal_devtarget
