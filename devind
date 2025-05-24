@@ -8,7 +8,7 @@
 #                without modifying the original Makefiles. Acts as a flexible
 #                buildflow orchestrator using environment-specific profiles.
 # Author       : Oliveira S.
-# Version      : 0.1
+# Version      : 0.2
 # License      : MIT
 # Repository   : https://gitlab.com/oliveira.s/devind
 #------------------------------------------------------------------------------
@@ -20,10 +20,8 @@
 #------------------------------------------------------------------------------
 
 # Including DevinD configuration ----------------------------------------------
-DEVINDRC_FILE	:= $(wildcard .devindrc)
-ifneq ("$(DEVINDRC_FILE)","")
-include $(DEVINDRC_FILE)
-endif
+DEVINDRC_FILE	:= .devindrc
+include $(wildcard $(DEVINDRC_FILE))
 
 # Configuration ---------------------------------------------------------------
 DEVIND_MAKEFILE_ENTRY 		?= Makefile
