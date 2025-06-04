@@ -84,7 +84,7 @@ $(DEVIND_FOLDER) $(DEVIND_GENERATE_FOLDER): # Devind Folder Creation
 overwrite-devindrc:
 	$(QUIET){ \
 	if [ -f $(DEVINDRC_FILE) ]; then \
-		$(call log,$(CONF_TAG),\`$(DEVINDRC_FILE)\` already exists! Do you want to overwrite it? (y/n): ,n); \
+		$(call log,$(WARN_TAG),\`$(DEVINDRC_FILE)\` already exists! Do you want to overwrite it? (y/n): ,n); \
 		read overwrite; \
 		overwrite=$${overwrite}; \
 		if [ "$$overwrite" != "y" ]; then \
@@ -108,9 +108,9 @@ configure-devind: overwrite-devindrc
 		read devind_makefile_entry; \
 		devind_makefile_entry=$${devind_makefile_entry:-$(DEVIND_MAKEFILE_ENTRY)}; \
 		\
-		$(call log,$(CONF_TAG),Enter the path to the YAML file (default: $$devind_folder/devind.yaml): ,n); \
+		$(call log,$(CONF_TAG),Enter the path to the YAML file (default: $(DEVIND_YAML_FILE)): ,n); \
 		read devind_yaml_file; \
-		devind_yaml_file=$${devind_yaml_file:-$$devind_folder/devind.yaml}; \
+		devind_yaml_file=$${devind_yaml_file:-$(DEVIND_YAML_FILE)}; \
 		\
 		{ \
 			echo "# Auto-Generated DevinD Configuration File"; \
