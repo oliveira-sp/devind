@@ -127,7 +127,7 @@ force-gen: ## Force Makefiles Re-Generation by updating timestamp of yaml config
 	$(QUIET)touch $(DEVIND_YAML_FILE)
 
 .PHONY: clean-gen
-clean-gen: dada ## Cleaning All Generated Makefiles
+clean-gen: ## Cleaning All Generated Makefiles
 	$(QUIET)$(call log,$(CLEAN_TAG),Removing All Generated Makefiles.)
 	$(QUIET) rm -rf $(DEVIND_GENERATE_FOLDER)/*.mk
 
@@ -145,8 +145,8 @@ devtargets: ## List all devtargets defined in the YAML config file
 help: ## Display this help
 	$(QUIET)echo Usage: ./devind [options] [target]
 	$(QUIET)echo Devind Targets:
-	$(QUIET)grep -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk -F':' '{desc_pos = index($$0, "## "); if (desc_pos) { desc = substr($$0, desc_pos + 3); printf "  \033[34m%-20s\033[0m %s\n", $$2, desc; }}' | sort
+	$(QUIET)grep --no-filename -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[34m  %-30s\033[0m %s\n", $$1, $$2}'
 
 # YAML Query Helpers ----------------------------------------------------------
 define get_goal_devtarget
@@ -242,6 +242,4 @@ devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(DEV_TARGET_FILE)
 
 # Target Dispatcher: Default Goal Passthrough ---------------------------------
 %:
-	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) devind-target-runner GOAL=$@ \
-		DEVIND_MAKEFILE_ENTRY=$(DEVIND_MAKEFILE_ENTRY) \
-		DEVIND_FOLDER=$(DEVIND_FOLDER)
+	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) devind-target-runner GOAL=$@
