@@ -242,6 +242,4 @@ devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(DEV_TARGET_FILE)
 
 # Target Dispatcher: Default Goal Passthrough ---------------------------------
 %:
-	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) devind-target-runner GOAL=$@ \
-		DEVIND_MAKEFILE_ENTRY=$(DEVIND_MAKEFILE_ENTRY) \
-		DEVIND_FOLDER=$(DEVIND_FOLDER)
+	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) devind-target-runner GOAL=$@
