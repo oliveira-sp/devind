@@ -127,7 +127,7 @@ force-gen: ## Force Makefiles Re-Generation by updating timestamp of yaml config
 	$(QUIET)touch $(DEVIND_YAML_FILE)
 
 .PHONY: clean-gen
-clean-gen: dada ## Cleaning All Generated Makefiles
+clean-gen: ## Cleaning All Generated Makefiles
 	$(QUIET)$(call log,$(CLEAN_TAG),Removing All Generated Makefiles.)
 	$(QUIET) rm -rf $(DEVIND_GENERATE_FOLDER)/*.mk
 
