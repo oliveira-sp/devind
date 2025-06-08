@@ -1,3 +1,5 @@
+include examples/examples.mk
+
 ifeq ($(V),1)
 QUIET := 
 else
