@@ -8,8 +8,13 @@ endif
 
 DEVIND_SCRIPT:= src/devind
 
-PHONY: dist
+.PHONY: dist
 dist: ## Not yet implemented
+
+.PHONY: clean
+clean: ## Clean generated files and folders
+	$(QUIET)echo "[CLEAN] Removing generated files.."
+	$(QUIET)rm -rf .devind
 
 .PHONY: help
 help: ## Display this help
