@@ -13,7 +13,7 @@ dist: ## Not yet implemented
 
 .PHONY: clean
 clean: ## Clean generated files and folders
-	$(QUIET)echo "[CLEAN] Removing generated files.."
+	$(QUIET)echo "Removing generated files.."
 	$(QUIET)rm -rf .devind
 
 .PHONY: help
