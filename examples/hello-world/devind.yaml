@@ -1,0 +1,34 @@
+default_devtarget: dev-local
+
+global:
+  DEFAULT_CMD_EXEC: make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)
+
+profiles:
+  docker:
+    DOCKER_CMD: docker run
+  docker-interactive:
+    DOCKER_OPT+: -it
+  docker-remove:
+    DOCKER_OPT+: --rm
+  docker-bind-workspace:
+    DOCKER_OPT+: -v .:/work
+    DOCKER_OPT+: -w /work
+
+devtargets:
+  local:
+    var:
+      CMD_EXEC: $(DEFAULT_CMD_EXEC)
+
+  docker:
+    profiles:
+      - docker
+      - docker-remove
+      - docker-interactive
+      - docker-bind-workspace
+    var:
+      DOCKER_IMAGE: hello-devind:latest
+      CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE)
+      CMD_EXEC: $(DEFAULT_CMD_EXEC)
+
+goals:
+  hello: dev-docker

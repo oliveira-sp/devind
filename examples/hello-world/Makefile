@@ -1,6 +1,10 @@
-.PHONY: all
-all: a b c
+.PHONY: hello clean docker-build
 
-.PHONY: a b c d e f g h z y z x
-a b c d e f g h z y x:
-	@echo "Hello World from: $@!"
+hello:
+	@echo "Hello from inside the devind container!"
+
+clean:
+	@echo "Cleaning things up..."
+
+docker-build:
+	docker build -t hello-devind:latest .
