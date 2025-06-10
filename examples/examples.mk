@@ -8,7 +8,7 @@ run-example-%: ## Run example by folder name
 		YAML_TOOL=src/devind_yaml_parser.awk $(GOALS)
 
 .PHONY: list-examples
-list-examples: ## List the available examples and show usage
+list-examples: ## List available examples and display usage
 	$(QUIET)echo "Usage: make run-example-<name> GOALS=your_goal"
 	$(QUIET)echo
 	$(QUIET)echo "Available examples:"
