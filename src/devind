@@ -1,4 +1,4 @@
-#!make -f
+#!/usr/bin/make -f
 #------------------------------------------------------------------------------
 # DevinD Makefile
 #------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ overwrite-devindrc:
 
 # Rules: DevinD Entry Points --------------------------------------------------
 .PHONY: configure-devind
-configure-devind: overwrite-devindrc
+configure-devind: overwrite-devindrc ## Interactive DevinD Configuration (writting .devindrc file)
 	$(QUIET)$(call log,$(CONF_TAG),Starting DevinD interactive environment configuration...)
 	$(QUIET){ \
 		$(call log,$(CONF_TAG),Enter the folder name for DevinD (default: $(DEVIND_FOLDER)): ,n); \
@@ -143,10 +143,10 @@ devtargets: ## List all devtargets defined in the YAML config file
 
 .PHONY: help
 help: ## Display this help
-	$(QUIET)echo Usage: ./devind [options] [target]
-	$(QUIET)echo Devind Targets:
-	$(QUIET)grep --no-filename -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[34m  %-30s\033[0m %s\n", $$1, $$2}'
+	$(QUIET)echo "Usage: ./devind [options] [target]"
+	$(QUIET)echo "Devind Targets:"
+	$(QUIET)grep -hE '^[a-zA-Z0-9_.%/-]+:.*## ' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN { FS = ":.*## " } { printf "\033[34m  %-30s\033[0m %s\n", $$1, $$2 }'
 
 # YAML Query Helpers ----------------------------------------------------------
 define get_goal_devtarget
@@ -236,7 +236,7 @@ $(DEVIND_GENERATE_FOLDER)/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FIL
 devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(DEV_TARGET_FILE)
 	$(eval include $^)
 	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(DEVIND_DEVTARGET))
-	$(QUIET) $(CMD_PREFIX) "$(GOAL)" $(CMD_SUFFIX)
+	$(QUIET) $(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
 	$(QUIET)echo
 
 
