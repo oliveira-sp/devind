@@ -2,6 +2,8 @@ default_devtarget: dev-local
 
 global:
   DEFAULT_CMD_EXEC: make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)
+  CMD_PREFIX:
+  CMD_SUFFIX:
 
 profiles:
   docker:
