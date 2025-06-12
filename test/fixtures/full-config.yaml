@@ -15,7 +15,9 @@ profiles:
   docker-bind-workspace:
     DOCKER_OPT+: -v .:/work
     DOCKER_OPT+: -w /work
-
+  dummy:
+    DUMMY_VAR: dummy
+ 
 devtargets:
   local:
     var:
@@ -34,3 +36,5 @@ devtargets:
 
 goals:
   hello: dev-docker
+  clean: dev-local
+  build: dev-docker
