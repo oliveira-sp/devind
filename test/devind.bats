@@ -13,5 +13,5 @@ load test_helper.bash
 @test "devind help prints expected usage" {
   run ./devind help
   [ "$status" -eq 0 ]
-  [[ "$output" =~ "Usage: ./devind [options] [target]" ]]
+  assert_line 'Usage: ./devind [options] [target]'
 }
