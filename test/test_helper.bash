@@ -11,5 +11,11 @@ setup() {
 }
 
 teardown() {
+  
+  echo ""
+  echo "Exit status: $status"
+  echo "== Output =="
+  printf "$output"
+
   rm -rf "$TMPDIR"
 }
