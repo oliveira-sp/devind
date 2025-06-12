@@ -14,6 +14,12 @@ BEGIN {
     }
 
     target_key_depth = ARGC - 2
+    
+    if (target_key_depth <= 0) {
+        print "No key specified." > "/dev/stderr"
+        exit 1
+    }
+
     for (i = 1; i <= target_key_depth; i++) {
         keys[i] = ARGV[i + 1]
         delete ARGV[i + 1]
