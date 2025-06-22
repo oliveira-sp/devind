@@ -1,0 +1,22 @@
+default_devtarget: dev-default
+
+global:
+  CMD_EXEC:
+  CMD_PREFIX:
+  CMD_SUFFIX:
+ 
+devtargets:
+  default:
+    var:
+      DUMMY: nice
+  a:
+    var:
+      DUMMY: one
+  b:
+    var:
+      FOO: BAR
+
+goals:
+  a: dev-a
+  b: dev-default
+  c: dev-b
