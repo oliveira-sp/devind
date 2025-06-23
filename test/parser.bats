@@ -2,34 +2,37 @@
 
 load test_helper.bash
 
+# Path to the parser script inside the test temp copy
+PARSER_SCRIPT="./.devind/devind_yaml_parser.awk"
+
 parse_yaml() {
     local mode="$1"
     local path="$2"
     local file="$3"
 
-    ./devind_yaml_parser.awk "$mode" $path < "$file"
+    "$PARSER_SCRIPT" "$mode" $path < "$file"
 }
 
 @test "parser fails when mode is not valid" {
-    run parse_yaml "dada" "" "${BATS_TEST_DIRNAME}/fixtures/minimal-config.yaml"
+    run parse_yaml "dada" "" "$DEVIND_YAML_MINIMAL"
     [ "$status" -eq 1 ]
     assert_output "Invalid mode: dada"
 }
 
 @test "parser fails when mode and no key param are specified" {
-    run parse_yaml "node" "" "${BATS_TEST_DIRNAME}/fixtures/minimal-config.yaml"
+    run parse_yaml "node" "" "$DEVIND_YAML_MINIMAL"
     [ "$status" -eq 1 ]
     assert_output "No key specified."
 }
 
 @test "parser successfully retrieve default_devtarget value from minimal-config.yaml" {
-    run parse_yaml "value" "default_devtarget" "${BATS_TEST_DIRNAME}/fixtures/minimal-config.yaml"
+    run parse_yaml "value" "default_devtarget" "$DEVIND_YAML_MINIMAL"
     [ "$status" -eq 0 ]
     assert_output "dev-local"
 }
 
 @test "parser retrieve all profiles available from full-config.yaml" {
-    run parse_yaml "node" "profiles" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "node" "profiles" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
 
     [ "${#lines[@]}" -eq 5 ]
@@ -41,7 +44,7 @@ parse_yaml() {
 }
 
 @test "parser retrieve all global variables from full-config.yaml" {
-    run parse_yaml "vars" "global" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "vars" "global" "$DEVIND_YAML_FULL"
     
     [ "$status" -eq 0 ]
 
@@ -52,7 +55,7 @@ parse_yaml() {
 }
 
 @test "parser retrieve all dev-docker variables from full-config.yaml" {
-    run parse_yaml "vars" "devtargets docker var" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "vars" "devtargets docker var" "$DEVIND_YAML_FULL"
     
     [ "$status" -eq 0 ]
 
@@ -63,7 +66,7 @@ parse_yaml() {
 }
 
 @test "parser retrieve all dev-docker inherited profiles from full-config.yaml" {
-    run parse_yaml "list" "devtargets docker profiles" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "list" "devtargets docker profiles" "$DEVIND_YAML_FULL"
     
     [ "$status" -eq 0 ]
 
@@ -75,7 +78,7 @@ parse_yaml() {
 }
 
 @test "parser retrieve goals that have devtarget mapping from full-config.yaml" {
-    run parse_yaml "node" "goals" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "node" "goals" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
 
     [ "${#lines[@]}" -eq 3 ]
@@ -85,15 +88,15 @@ parse_yaml() {
 }
 
 @test "parser retrieve goal devtarget from full-config.yaml" {
-    run parse_yaml "value" "goals hello" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "value" "goals hello" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
     assert_output 'dev-docker'
 
-    run parse_yaml "value" "goals clean" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "value" "goals clean" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
     assert_output 'dev-local'
 
-    run parse_yaml "value" "goals build" "${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+    run parse_yaml "value" "goals build" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
     assert_output 'dev-docker'
 }
