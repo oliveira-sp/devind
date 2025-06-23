@@ -5,6 +5,7 @@
 #   devind_yaml_parser.awk value key1 key2 … < devind.yaml
 #   devind_yaml_parser.awk list  key1 key2 … < devind.yaml
 #   devind_yaml_parser.awk vars  key1 key2 … < devind.yaml
+#   devind_yaml_parser.awk node  key1 key2 … < devind.yaml
 
 BEGIN {
     mode = ARGV[1]
