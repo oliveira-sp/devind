@@ -40,3 +40,19 @@ load test_helper.bash
 
   assert_line '[EXEC] Running make target `d` in devtarget: dev-default'
 }
+
+@test "devind fails when default devtarget is not defined" {
+  export DEVIND_YAML_FILE="$(mktemp)"
+  export COLOR_ENABLED=0
+
+  # Create an empty YAML file without a default devtarget
+  echo "{}" > "$DEVIND_YAML_FILE"
+
+  run ./devind e # e is not defined in the YAML, should use default
+
+  [ "$status" -eq 2 ]
+  assert_line '[ERROR] No devtarget defined and no default fallback found for goal `e`'
+
+  # Clean up the temporary file
+  rm -f "$DEVIND_YAML_FILE"
+}
