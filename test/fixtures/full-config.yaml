@@ -17,7 +17,7 @@ profiles:
     DOCKER_OPT+: -w /work
   dummy:
     DUMMY_VAR: dummy
- 
+
 devtargets:
   local:
     var:
@@ -33,8 +33,15 @@ devtargets:
       DOCKER_IMAGE: hello-devind:latest
       CMD_PREFIX: $(DOCKER_CMD) $(DOCKER_OPT) $(DOCKER_IMAGE)
       CMD_EXEC: $(DEFAULT_CMD_EXEC)
+      
+  dummy:
+    var:
+      CMD_PREFIX: [DUMMY_PREFIX]
+      CMD_EXEC: echo "dummy command"
+      CMD_SUFFIX: [DUMMY_SUFFIX]
 
 goals:
   hello: dev-docker
   clean: dev-local
   build: dev-docker
+  dummy: dev-dummy

@@ -81,10 +81,11 @@ parse_yaml() {
     run parse_yaml "node" "goals" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
 
-    [ "${#lines[@]}" -eq 3 ]
+    [ "${#lines[@]}" -eq 4 ]
     assert_line 'hello'
     assert_line 'clean'
     assert_line 'build'
+    assert_line 'dummy'
 }
 
 @test "parser retrieve goal devtarget from full-config.yaml" {

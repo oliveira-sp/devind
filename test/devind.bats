@@ -56,3 +56,39 @@ load test_helper.bash
   # Clean up the temporary file
   rm -f "$DEVIND_YAML_FILE"
 }
+
+@test "devind executes the correct command for the clean target" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+  export V=1 # Enable verbose output
+
+  run ./devind clean
+
+  assert_output --partial '[EXEC] Running make target `clean` in devtarget: dev-local'
+  assert_output --partial 'make -f Makefile clean'
+}
+
+@test "devind sets CMD_PREFIX correctly before CMD_EXEC for the 'hello' target" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+  export V=1 # Enable verbose output
+
+  run ./devind hello
+
+  # Assert that CMD_PREFIX is correctly set before CMD_EXEC
+  assert_output --partial '[EXEC] Running make target `hello` in devtarget: dev-docker'
+  assert_output --partial 'docker run --rm -it -v .:/work -w /work hello-devind:latest make -f Makefile hello'
+}
+
+@test "devind sets CMD_SUFFIX correctly after CMD_EXEC for the 'dummy' target" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+  export V=1 # Enable verbose output
+
+  run ./devind dummy
+
+  # Assert that CMD_SUFFIX is correctly set after CMD_EXEC
+  assert_output --partial '[EXEC] Running make target `dummy` in devtarget: dev-dummy'
+  assert_output --partial '[DUMMY_PREFIX] echo "dummy command" [DUMMY_SUFFIX]'
+}
+
