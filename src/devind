@@ -212,7 +212,7 @@ $(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE) | $(DEVIND_GENERATE_FOL
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
 		echo ""; \
-		echo "# Global Variables Definition "; \
+		echo "# Global Variables Definitions"; \
 		$(YAML_TOOL) vars global < $(DEVIND_YAML_FILE); \
 	} > $@
 

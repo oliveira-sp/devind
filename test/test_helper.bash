@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+assert_file_lines_equal() {
+  local file=$1
+  shift
+  mapfile -t actual < "$file"
+  local -a expected=("$@")
+
+  for i in "${!expected[@]}"; do
+    [ "${actual[$i]}" = "${expected[$i]}" ] || {
+      echo "Mismatch at line $((i+1)):"
+      echo "Expected: ${expected[$i]}"
+      echo "Actual:   ${actual[$i]}"
+      return 1
+    }
+  done
+}
+
 # Common setup for all tests
 setup() {
   bats_load_library bats-support
