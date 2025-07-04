@@ -234,10 +234,10 @@ $(DEVIND_GENERATE_FOLDER)/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FIL
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
 		echo ""; \
-		echo "# Devtarget \`$*\` Profile Includes"; \
+		echo "# Devtarget \`$*\` Profiles Includes"; \
 		echo "include $(DEVTARGET_PROFILE_FILES)"; \
 		echo "";\
-		echo "# Devtarget \`$*\` Variables Definitions "; \
+		echo "# Devtarget \`$*\` Variables Definitions"; \
 		$(YAML_TOOL) vars devtargets $* var < $(DEVIND_YAML_FILE); \
 	} > $@
 
