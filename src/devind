@@ -66,7 +66,7 @@ endef
 define log_in_make # usage: $(call log_in_make,<tag>,<message>,<optional_no_newline_flag>)
 $(if $(filter $1,$(ERROR_TAG)),\
   $(shell $(call log,$1,$2,$3) >&2) $(error Fatal error detected, aborting Make),\
-  $(shell $(call log,$1,$2,$3) >&0))
+  $(shell $(call log,$1,$2,$3)))
 endef
 
 # Generated Header (for .mk files) --------------------------------------------
