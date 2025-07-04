@@ -223,7 +223,7 @@ $(DEVIND_GENERATE_FOLDER)/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
 		echo ""; \
-		echo "# Profile \`$*\` Variables Definitions "; \
+		echo "# Profile \`$*\` Variables Definitions"; \
 		$(YAML_TOOL) vars profiles $* < $(DEVIND_YAML_FILE); \
 	} > $@
 
