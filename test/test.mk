@@ -3,10 +3,17 @@ TEST_IMAGE_NAME := devind-test:latest
 TEST_IMAGE_STAMP := test/.devind-test.built
 TEST_DOCKERFILE := test/Dockerfile
 TEST_CONTEXT := test
+TEST_DOCKER_OPTIONS := --rm -v "${PWD}:/code"
+
+ifdef CI
+TEST_DOCKER_OPTIONS += -i
+else
+TEST_DOCKER_OPTIONS += -it
+endif
 
 .PHONY: test
 test: build-test-image ## Execute DevinD unit-tests
-	$(QUIET)docker run --rm -it -v "${PWD}:/code" $(TEST_IMAGE_NAME) test
+	docker run $(TEST_DOCKER_OPTIONS) $(TEST_IMAGE_NAME) test
 
 $(TEST_IMAGE_STAMP): $(TEST_DOCKERFILE)
 	@echo "[+] Building $(TEST_IMAGE_NAME)..."
