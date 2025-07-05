@@ -31,24 +31,30 @@ DEVIND_YAML_FILE 			?= devind.yaml
 YAML_TOOL       			?= $(DEVIND_FOLDER)/devind_yaml_parser.awk
 
 # Verbosity -------------------------------------------------------------------
-ifeq ($(V),1)
-QUIET := 
-else
-QUIET := @
-endif
-
+# Suppress command output unless V=1
+QUIET ?= $(if $(filter 1,$(V)),,@)
 # Logging definitions ---------------------------------------------------------
-ERROR_TAG	:= [\\033[38;5;160mERROR\033[0m]
-WARN_TAG 	:= [\\033[38;5;220mWARN\\033[0m]
-INFO_TAG 	:= [INFO]
-DEBUG_TAG	:= [\\033[38;5;81mDEBUG\\033[0m]
-CONF_TAG	:= [\\033[38;5;252mCONF\\033[0m]
-GEN_TAG		:= [\\033[38;5;252mGEN\\033[0m]
-EXEC_TAG	:= [\\033[38;5;33mEXEC\\033[0m]
-CLEAN_TAG	:= [\\033[38;5;252mCLEAN\\033[0m]
+# Enable colored output by default
+COLOR_ENABLED ?= 1
+ESC := \033
 
-# log: print a log message with optional newline
-define log # $1 = tag, $2 = message, $3 = "n" for no newline
+# color_tag: return colored tag if enabled, else plain tag
+define color_tag # usage: $(call color_tag,<ANSI_color_code>,<tag_text>)
+$(if $(filter 1,$(COLOR_ENABLED)),[$(ESC)[$(1)m$(2)$(ESC)[0m],[$(2)])
+endef
+
+# Log tags with colors or plain fallback
+ERROR_TAG := $(call color_tag,38;5;160,ERROR)
+WARN_TAG  := $(call color_tag,38;5;220,WARN)
+INFO_TAG  := [INFO]
+DEBUG_TAG := $(call color_tag,38;5;81,DEBUG)
+CONF_TAG  := $(call color_tag,38;5;252,CONF)
+GEN_TAG   := $(call color_tag,38;5;252,GEN)
+EXEC_TAG  := $(call color_tag,38;5;33,EXEC)
+CLEAN_TAG := $(call color_tag,38;5;252,CLEAN)
+
+# log: print a log message, optional no newline if $3 = "n"
+define log # usage: $(call log,<tag>,<message>,<optional_no_newline_flag>)
 if [ "$3" = "n" ]; then \
   printf '%b %s' "$1" "$2"; \
 else \
@@ -57,10 +63,10 @@ fi
 endef
 
 # log_in_make: print log; if tag is ERROR_TAG, print to stderr and abort Make
-define log_in_make # usage: $(call log_in_make,<tag>,<message>,<newline_flag>)
+define log_in_make # usage: $(call log_in_make,<tag>,<message>,<optional_no_newline_flag>)
 $(if $(filter $1,$(ERROR_TAG)),\
   $(shell $(call log,$1,$2,$3) >&2) $(error Fatal error detected, aborting Make),\
-  $(shell $(call log,$1,$2,$3) >&0))
+  $(shell $(call log,$1,$2,$3)))
 endef
 
 # Generated Header (for .mk files) --------------------------------------------
@@ -149,23 +155,28 @@ help: ## Display this help
 		awk 'BEGIN { FS = ":.*## " } { printf "\033[34m  %-30s\033[0m %s\n", $$1, $$2 }'
 
 # YAML Query Helpers ----------------------------------------------------------
-define get_goal_devtarget
+# get_goal_devtarget: get devtarget mapped to a given goal from YAML
+define get_goal_devtarget # usage: $(call get_goal_devtarget,<goal>)
   $(shell $(YAML_TOOL) value goals $(1) < $(DEVIND_YAML_FILE))
 endef
 
-define get_default_devtarget
+# get_default_devtarget: get default devtarget from YAML root
+define get_default_devtarget # usage: $(call get_default_devtarget)
   $(shell $(YAML_TOOL) value default_devtarget < $(DEVIND_YAML_FILE))
 endef
 
-define get_devtarget_profiles
+# get_devtarget_profiles: list profiles associated with a devtarget
+define get_devtarget_profiles # usage: $(call get_devtarget_profiles,<devtarget>)
   $(shell $(YAML_TOOL) list devtargets $(1) profiles < $(DEVIND_YAML_FILE))
 endef
 
-define get_profiles
+# get_profiles: list all profiles defined in YAML
+define get_profiles # usage: $(call get_profiles)
   $(shell $(YAML_TOOL) node profiles < $(DEVIND_YAML_FILE))
 endef
 
-define get_devtargets
+# get_devtargets: list all devtargets defined in YAML
+define get_devtargets # usage: $(call get_devtargets)
   $(shell $(YAML_TOOL) node devtargets < $(DEVIND_YAML_FILE))
 endef
 
@@ -201,7 +212,7 @@ $(DEVIND_GENERATE_FOLDER)/global.mk: $(DEVIND_YAML_FILE) | $(DEVIND_GENERATE_FOL
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
 		echo ""; \
-		echo "# Global Variables Definition "; \
+		echo "# Global Variables Definitions"; \
 		$(YAML_TOOL) vars global < $(DEVIND_YAML_FILE); \
 	} > $@
 
@@ -212,7 +223,7 @@ $(DEVIND_GENERATE_FOLDER)/profile-%.mk: $(DEVIND_YAML_FILE)
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
 		echo ""; \
-		echo "# Profile \`$*\` Variables Definitions "; \
+		echo "# Profile \`$*\` Variables Definitions"; \
 		$(YAML_TOOL) vars profiles $* < $(DEVIND_YAML_FILE); \
 	} > $@
 
@@ -223,10 +234,10 @@ $(DEVIND_GENERATE_FOLDER)/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FIL
 	$(QUIET){ \
 		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
 		echo ""; \
-		echo "# Devtarget \`$*\` Profile Includes"; \
+		echo "# Devtarget \`$*\` Profiles Includes"; \
 		echo "include $(DEVTARGET_PROFILE_FILES)"; \
 		echo "";\
-		echo "# Devtarget \`$*\` Variables Definitions "; \
+		echo "# Devtarget \`$*\` Variables Definitions"; \
 		$(YAML_TOOL) vars devtargets $* var < $(DEVIND_YAML_FILE); \
 	} > $@
 

@@ -1,2 +1,5 @@
 .devind/
 .devindrc
+
+test/.devind-test.built
+report.xml

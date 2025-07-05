@@ -1,4 +1,5 @@
 include examples/examples.mk
+include test/test.mk
 
 ifeq ($(V),1)
 QUIET := 
@@ -16,6 +17,7 @@ clean: ## Clean generated files and folders
 	$(QUIET)echo "Removing generated files.."
 	$(QUIET)rm -rf .devind
 
+# Automatic help documentation ================================================
 .PHONY: help
 help: ## Display this help
 	$(QUIET)echo "Usage: ./devind [options] [target]"

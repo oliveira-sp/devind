@@ -5,6 +5,7 @@
 #   devind_yaml_parser.awk value key1 key2 … < devind.yaml
 #   devind_yaml_parser.awk list  key1 key2 … < devind.yaml
 #   devind_yaml_parser.awk vars  key1 key2 … < devind.yaml
+#   devind_yaml_parser.awk node  key1 key2 … < devind.yaml
 
 BEGIN {
     mode = ARGV[1]
@@ -14,6 +15,12 @@ BEGIN {
     }
 
     target_key_depth = ARGC - 2
+    
+    if (target_key_depth <= 0) {
+        print "No key specified." > "/dev/stderr"
+        exit 1
+    }
+
     for (i = 1; i <= target_key_depth; i++) {
         keys[i] = ARGV[i + 1]
         delete ARGV[i + 1]
