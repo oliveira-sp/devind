@@ -13,7 +13,7 @@ endif
 
 .PHONY: test
 test: build-test-image ## Execute DevinD unit-tests
-	docker run $(TEST_DOCKER_OPTIONS) $(TEST_IMAGE_NAME) test
+	docker run $(TEST_DOCKER_OPTIONS) $(TEST_IMAGE_NAME) test --report-formatter junit
 
 $(TEST_IMAGE_STAMP): $(TEST_DOCKERFILE)
 	@echo "[+] Building $(TEST_IMAGE_NAME)..."

@@ -16,3 +16,9 @@ unit-test:
     - make test
   rules:
     - when: always
+  artifacts:
+    when: always
+    paths:
+      - report.xml
+    reports:
+      junit: report.xml
