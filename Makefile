@@ -12,6 +12,7 @@ DEVIND_PARSER:= src/devind_yaml_parser.awk
 
 BUILD_FOLDER:= .build
 
+AWK_MINIMIZER_SCRIPT:= tools/awk_minimizer.sh
 MINIMIZED_PARSER:= $(BUILD_FOLDER)/minimized.awk
 DEVIND_OUTPUT:= $(BUILD_FOLDER)/devind
 
@@ -21,7 +22,7 @@ $(BUILD_FOLDER):
 
 $(MINIMIZED_PARSER): $(DEVIND_PARSER) | $(BUILD_FOLDER)
 	$(QUIET)echo "Minimizing awk parser.."
-	$(QUIET)touch $@
+	$(QUIET)$(AWK_MINIMIZER_SCRIPT) $< $@
 
 $(DEVIND_OUTPUT): $(DEVIND_SCRIPT) $(MINIMIZED_PARSER) | $(BUILD_FOLDER)
 	$(QUIET)echo "Building devind.."
