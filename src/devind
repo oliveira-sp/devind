@@ -8,7 +8,7 @@
 #                without modifying the original Makefiles. Acts as a flexible
 #                buildflow orchestrator using environment-specific profiles.
 # Author       : Oliveira S.
-# Version      : 0.2
+# Version      : __VERSION__
 # License      : MIT
 # Repository   : https://gitlab.com/oliveira.s/devind
 #------------------------------------------------------------------------------
