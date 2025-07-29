@@ -21,6 +21,7 @@ DEVIND_PARSER:= src/devind_yaml_parser.awk
 BUILD_FOLDER:= .build
 
 AWK_MINIMIZER_SCRIPT:= tools/awk_minimizer.sh
+PARSER_INSERT_SCRIPT:= tools/insert_content.sh
 MINIMIZED_PARSER:= $(BUILD_FOLDER)/min_yaml_parser.awk
 MINIMIZED_PARSER_ESCAPED := $(BUILD_FOLDER)/min_escaped_yaml_parser.awk
 DEVIND_OUTPUT:= $(BUILD_FOLDER)/devind
@@ -45,6 +46,8 @@ $(DEVIND_OUTPUT): $(DEVIND_SCRIPT) $(MINIMIZED_PARSER_ESCAPED) | $(BUILD_FOLDER)
 	$(QUIET)cp $< $@
 	$(QUIET)echo "Injecting version in $@ ..."
 	$(QUIET)$(SED_INPLACE) 's/__VERSION__/$(VERSION)/' $@
+	$(QUIET)echo "Embedding minimized yaml parser in $@ ..."
+	$(QUIET)$(PARSER_INSERT_SCRIPT) '__YAML_MINIMIZED_PARSER_CODE__' $(MINIMIZED_PARSER_ESCAPED) $@
 	$(QUIET)chmod +x $@
 
 .PHONY: build

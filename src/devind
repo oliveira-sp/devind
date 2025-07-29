@@ -28,7 +28,12 @@ DEVIND_MAKEFILE_ENTRY 		?= Makefile
 DEVIND_FOLDER 				?= .devind
 DEVIND_GENERATE_FOLDER		?= $(DEVIND_FOLDER)/generated
 DEVIND_YAML_FILE 			?= devind.yaml
-YAML_TOOL       			?= $(DEVIND_FOLDER)/devind_yaml_parser.awk
+
+define YAML_AWK_PARSER_CODE
+__YAML_MINIMIZED_PARSER_CODE__
+endef
+
+YAML_TOOL := awk '$(YAML_AWK_PARSER_CODE)'
 
 # Verbosity -------------------------------------------------------------------
 # Suppress command output unless V=1
