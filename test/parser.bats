@@ -3,7 +3,7 @@
 load test_helper.bash
 
 # Path to the parser script inside the test temp copy
-PARSER_SCRIPT="./.devind/devind_yaml_parser.awk"
+PARSER_SCRIPT="./devind_yaml_parser.awk"
 
 parse_yaml() {
     local mode="$1"
