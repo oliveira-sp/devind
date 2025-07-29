@@ -15,7 +15,7 @@ DEVIND_PARSER:= src/devind_yaml_parser.awk
 BUILD_FOLDER:= .build
 
 AWK_MINIMIZER_SCRIPT:= tools/awk_minimizer.sh
-PARSER_INSERT_SCRIPT:= tools/insert_content.sh
+PARSER_INSERT_SCRIPT:= tools/replace_placeholder.sh
 MINIMIZED_PARSER:= $(BUILD_FOLDER)/min_yaml_parser.awk
 MINIMIZED_PARSER_ESCAPED := $(BUILD_FOLDER)/min_escaped_yaml_parser.awk
 DEVIND_OUTPUT:= $(BUILD_FOLDER)/devind
