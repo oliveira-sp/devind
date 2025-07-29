@@ -7,12 +7,6 @@ else
 QUIET := @
 endif
 
-SED_INPLACE := sed -i
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-  SED_INPLACE := sed -i ''
-endif
-
 VERSION = $(shell git describe --tags --always --dirty)
 
 DEVIND_SCRIPT:= src/devind
@@ -43,9 +37,9 @@ $(DEVIND_OUTPUT): $(DEVIND_SCRIPT) $(MINIMIZED_PARSER_ESCAPED) | $(BUILD_FOLDER)
 	$(QUIET)echo "Building: $@"
 	$(QUIET)cp $< $@
 	$(QUIET)echo "  Injecting version in $@ ..."
-	$(QUIET)$(SED_INPLACE) 's/__VERSION__/$(VERSION)/' $@
+	$(QUIET)$(PARSER_INSERT_SCRIPT) '__VERSION__' $(VERSION) $@
 	$(QUIET)echo "  Embedding minimized yaml parser in $@ ..."
-	$(QUIET)$(PARSER_INSERT_SCRIPT) '__YAML_MINIMIZED_PARSER_CODE__' $(MINIMIZED_PARSER_ESCAPED) $@
+	$(QUIET)$(PARSER_INSERT_SCRIPT) '__YAML_MINIMIZED_PARSER_CODE__' -f $(MINIMIZED_PARSER_ESCAPED) $@
 	$(QUIET)chmod +x $@
 
 .PHONY: build
