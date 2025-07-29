@@ -27,40 +27,38 @@ MINIMIZED_PARSER_ESCAPED := $(BUILD_FOLDER)/min_escaped_yaml_parser.awk
 DEVIND_OUTPUT:= $(BUILD_FOLDER)/devind
 
 $(BUILD_FOLDER):
-	$(QUIET)echo "Creating $@ folder.."
+	$(QUIET)echo "Creating $@ folder"
 	$(QUIET)mkdir -p $@
 
 $(MINIMIZED_PARSER): $(DEVIND_PARSER) | $(BUILD_FOLDER)
-	$(QUIET)echo "Minimizing awk parser.."
 	$(QUIET)$(AWK_MINIMIZER_SCRIPT) $< $@
 
 $(MINIMIZED_PARSER_ESCAPED): $(MINIMIZED_PARSER) | $(BUILD_FOLDER)
-	$(QUIET)echo "Escaping awk parser for embedding.."
 	$(QUIET)sed \
 		-e 's/[$$]/$$$$/g' \
 		-e 's/&/\\&/g' \
 		"$(MINIMIZED_PARSER)" > $@
 
 $(DEVIND_OUTPUT): $(DEVIND_SCRIPT) $(MINIMIZED_PARSER_ESCAPED) | $(BUILD_FOLDER)
-	$(QUIET)echo "Building $@.."
+	$(QUIET)echo "Building: $@"
 	$(QUIET)cp $< $@
-	$(QUIET)echo "Injecting version in $@ ..."
+	$(QUIET)echo "  Injecting version in $@ ..."
 	$(QUIET)$(SED_INPLACE) 's/__VERSION__/$(VERSION)/' $@
-	$(QUIET)echo "Embedding minimized yaml parser in $@ ..."
+	$(QUIET)echo "  Embedding minimized yaml parser in $@ ..."
 	$(QUIET)$(PARSER_INSERT_SCRIPT) '__YAML_MINIMIZED_PARSER_CODE__' $(MINIMIZED_PARSER_ESCAPED) $@
 	$(QUIET)chmod +x $@
 
 .PHONY: build
 build: $(DEVIND_OUTPUT) ## Build the devind script and place it in the build folder
-	$(QUIET)echo "Devind script built successfully here: $<"
+	$(QUIET)echo "\nDevind script built successfully here: $<\n"
 
 .PHONY: dist
 dist: ## Not yet implemented
 
 .PHONY: clean
 clean: ## Clean generated files and folders
-	$(QUIET)echo "Removing generated files.."
-	$(QUIET)rm -rf .devind
+	$(QUIET)echo "Removing generated files"
+	$(QUIET)rm -rf $(BUILD_FOLDER)
 
 # Automatic help documentation ================================================
 .PHONY: help
