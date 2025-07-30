@@ -24,11 +24,11 @@ setup() {
   TMPDIR="$(mktemp -d)"
   export TMPDIR
 
-  mkdir -p "$TMPDIR/.devind"
+  make build
+  cp ${BATS_TEST_DIRNAME}/../.build/devind "$TMPDIR/"
 
-    # Copy scripts from src/
-  cp "${BATS_TEST_DIRNAME}/../src/devind" "$TMPDIR/"
-  cp "${BATS_TEST_DIRNAME}/../src/devind_yaml_parser.awk" "$TMPDIR/.devind/"
+  # Copy yaml parser from src/
+  cp "${BATS_TEST_DIRNAME}/../src/devind_yaml_parser.awk" "$TMPDIR/"
 
   cd "$TMPDIR"
 
