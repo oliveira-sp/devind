@@ -160,8 +160,8 @@ help: ## Display this help
 		awk 'BEGIN { FS = ":.*## " } { printf "\033[34m  %-30s\033[0m %s\n", $$1, $$2 }'
 
 # YAML Query Helpers ----------------------------------------------------------
-# get_goal_devtarget: get devtarget mapped to a given goal from YAML
-define get_goal_devtarget # usage: $(call get_goal_devtarget,<goal>)
+# get_goal_value: get devtarget and eventual profiles mapped to a given goal from YAML
+define get_goal_value # usage: $(call get_goal_value,<goal>)
   $(shell $(YAML_TOOL) value goals $(1) < $(DEVIND_YAML_FILE))
 endef
 
@@ -185,29 +185,30 @@ define get_devtargets # usage: $(call get_devtargets)
   $(shell $(YAML_TOOL) node devtargets < $(DEVIND_YAML_FILE))
 endef
 
-# DevTarget Evaluation (only evaluated when devind-target-runner is called) ---
+# DevTarget Evaluation Logic ---------------------------------------------------
 ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
 
-  ifeq ($(strip $(GOAL)),)
-    $(error [ERROR] GOAL variable must be set for `devind-target-runner`)
-  endif
+  GOAL_VALUE := $(strip $(call get_goal_value,$(GOAL)))
+  GOAL_PROFILES := $(filter-out dev-%,$(GOAL_VALUE))
+  GOAL_DEVTARGET := $(firstword $(filter-out $(GOAL_PROFILES),$(GOAL_VALUE)))
 
-  DEVIND_DEVTARGET := $(strip $(call get_goal_devtarget,$(GOAL)))
+  ifeq ($(GOAL_DEVTARGET),)
+    GOAL_DEVTARGET := $(strip $(call get_default_devtarget))
 
-  ifeq ($(DEVIND_DEVTARGET),)
-    DEVIND_DEVTARGET := $(strip $(call get_default_devtarget))
-
-    ifeq ($(DEVIND_DEVTARGET),)
+    ifeq ($(GOAL_DEVTARGET),)
 		_ := $(call log_in_make,$(ERROR_TAG),No devtarget defined and no default fallback found for goal \`$(GOAL)\`)
     else
-		_ := $(call log_in_make,$(CONF_TAG),Using default devtarget: \`$(DEVIND_DEVTARGET)\` for goal \`$(GOAL)\`)
+		_ := $(call log_in_make,$(CONF_TAG),Using default devtarget: \`$(GOAL_DEVTARGET)\` for goal \`$(GOAL)\`)
     endif
   endif
 
-  DEVTARGET := $(subst dev-,,$(DEVIND_DEVTARGET))
-  DEVTARGET_PROFILES := $(call get_devtarget_profiles,$(DEVTARGET))
+  DEVTARGET := $(subst dev-,,$(GOAL_DEVTARGET))
+  DEVTARGET_PROFILES := $(call get_devtarget_profiles,$(DEVTARGET)) $(GOAL_PROFILES)
+
   DEVTARGET_PROFILE_FILES := $(patsubst %,$(DEVIND_GENERATE_FOLDER)/profile-%.mk,$(DEVTARGET_PROFILES))
-  DEV_TARGET_FILE := $(DEVIND_GENERATE_FOLDER)/$(DEVIND_DEVTARGET).mk
+  GOAL_DEVTARGET_FILE := $(DEVIND_GENERATE_FOLDER)/$(GOAL_DEVTARGET).mk
+  GOAL_PROFILE_FILES := $(patsubst %,$(DEVIND_GENERATE_FOLDER)/profile-%.mk,$(GOAL_PROFILES))
+  GOAL_FILE := $(DEVIND_GENERATE_FOLDER)/goal-$(GOAL).mk
 endif
 
 # Rule to Generate: Global Variable Makefile (global.mk) ----------------------
@@ -249,12 +250,12 @@ $(DEVIND_GENERATE_FOLDER)/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FIL
 
 # Target Runner (includes all environment data and runs target) ---------------
 .PHONY: devind-target-runner
-devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(DEV_TARGET_FILE)
-	$(eval include $^)
-	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(DEVIND_DEVTARGET))
+devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(GOAL_DEVTARGET_FILE) $(GOAL_PROFILE_FILES) 
+	$(eval include $^ )
+	$(QUIET)$(call log,$(DEBUG_TAG),Including: $^)
+	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(GOAL_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
 	$(QUIET)echo
-
 
 # Target Dispatcher: Default Goal Passthrough ---------------------------------
 %:
