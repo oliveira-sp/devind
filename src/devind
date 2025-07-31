@@ -247,10 +247,20 @@ $(DEVIND_GENERATE_FOLDER)/dev-%.mk: $(DEVTARGET_PROFILE_FILES) $(DEVIND_YAML_FIL
 		$(YAML_TOOL) vars devtargets $* var < $(DEVIND_YAML_FILE); \
 	} > $@
 
+# Rule to Generate: Goal Makefile (goal-%.mk) ---------------------------------
+.SECONDARY: $(DEVIND_GENERATE_FOLDER)/goal-%.mk
+$(DEVIND_GENERATE_FOLDER)/goal-%.mk: $(DEVIND_GENERATE_FOLDER)/global.mk $(GOAL_DEVTARGET_FILE) $(GOAL_PROFILE_FILES) 
+	$(QUIET){ \
+		for line in $(DEVIND_GENERATED_HEADER_LINES); do echo "$$line"; done; \
+		echo ""; \
+		echo "# Goal \`$*\` Includes"; \
+		echo "include $^"; \
+		echo ""; \
+	} > $@
 
 # Target Runner (includes all environment data and runs target) ---------------
 .PHONY: devind-target-runner
-devind-target-runner: $(DEVIND_GENERATE_FOLDER)/global.mk $(GOAL_DEVTARGET_FILE) $(GOAL_PROFILE_FILES) 
+devind-target-runner: $(DEVIND_GENERATE_FOLDER)/goal-%.mk
 	$(eval include $^ )
 	$(QUIET)$(call log,$(DEBUG_TAG),Including: $^)
 	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(GOAL_DEVTARGET))
