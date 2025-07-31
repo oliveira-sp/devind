@@ -188,10 +188,12 @@ endef
 # DevTarget Evaluation Logic ---------------------------------------------------
 ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
 
+  # Parse the goal value to extract devtarget and profiles
   GOAL_VALUE := $(strip $(call get_goal_value,$(GOAL)))
   GOAL_PROFILES := $(filter-out dev-%,$(GOAL_VALUE))
   GOAL_DEVTARGET := $(firstword $(filter-out $(GOAL_PROFILES),$(GOAL_VALUE)))
 
+  # Fallback to default devtarget if none explicitly defined in goal
   ifeq ($(GOAL_DEVTARGET),)
     GOAL_DEVTARGET := $(strip $(call get_default_devtarget))
 
@@ -202,9 +204,11 @@ ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
     endif
   endif
 
+  # Normalize devtarget name and compute profile list for the build context
   DEVTARGET := $(subst dev-,,$(GOAL_DEVTARGET))
   DEVTARGET_PROFILES := $(call get_devtarget_profiles,$(DEVTARGET)) $(GOAL_PROFILES)
 
+  # Determine required include files for the goal execution
   DEVTARGET_PROFILE_FILES := $(patsubst %,$(DEVIND_GENERATE_FOLDER)/profile-%.mk,$(DEVTARGET_PROFILES))
   GOAL_DEVTARGET_FILE := $(DEVIND_GENERATE_FOLDER)/$(GOAL_DEVTARGET).mk
   GOAL_PROFILE_FILES := $(patsubst %,$(DEVIND_GENERATE_FOLDER)/profile-%.mk,$(GOAL_PROFILES))
