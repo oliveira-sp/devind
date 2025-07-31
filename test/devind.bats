@@ -210,3 +210,39 @@ load test_helper.bash
     'CMD_SUFFIX:= [DUMMY_SUFFIX]' \
     ''
 }
+
+@test "devind goal inherits profiles correctly" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+  export V=1 # Enable verbose output
+
+  run ./devind remote-1-push
+
+  # Check that the command corresponds with the inherited profile
+  assert_output --partial '[EXEC] Running make target `remote-1-push` in devtarget: dev-ssh'
+  assert_output --partial 'remote ssh command: ssh user1@host1 make -f Makefile remote-1-push'
+}
+
+@test "devind goal inherits multiple profiles correctly" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+  export V=1 # Enable verbose output
+
+  run ./devind remote-2-push
+
+  # Check that the command corresponds with the inherited profiles
+  assert_output --partial '[EXEC] Running make target `remote-2-push` in devtarget: dev-ssh'
+  assert_output --partial 'remote ssh command: ssh root@host make -f Makefile remote-2-push'
+}
+
+@test "devind goal profiles override devtarget variables correctly" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+  export V=1 # Enable verbose output
+
+  run ./devind remote-3-push
+
+  # Check that the command corresponds with the inherited profiles
+  assert_output --partial '[EXEC] Running make target `remote-3-push` in devtarget: dev-ssh'
+  assert_output --partial 'remote ssh command: ssh root@host1 make -f Makefile remote-3-push'
+}
