@@ -36,6 +36,7 @@ setup() {
   export DEVIND_YAML_MINIMAL="${BATS_TEST_DIRNAME}/fixtures/minimal-config.yaml"
   export DEVIND_YAML_NO_EXEC="${BATS_TEST_DIRNAME}/fixtures/no-exec-config.yaml"
   export DEVIND_YAML_FULL="${BATS_TEST_DIRNAME}/fixtures/full-config.yaml"
+  export DEVIND_YAML_WRONG="${BATS_TEST_DIRNAME}/fixtures/wrong-config.yaml"
 }
 
 

@@ -246,3 +246,13 @@ load test_helper.bash
   assert_output --partial '[EXEC] Running make target `remote-3-push` in devtarget: dev-ssh'
   assert_output --partial 'remote ssh command: ssh root@host1 make -f Makefile remote-3-push'
 }
+
+@test "devind fails when multiple devtargets are defined for a goal" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_WRONG"
+  export COLOR_ENABLED=0
+
+  run ./devind multiple-devtargets
+
+  [ "$status" -eq 2 ]
+  assert_line '[ERROR] Found multiple devtargets (3) for goal `multiple-devtargets`. Exactly one devtarget must be specified.'
+}

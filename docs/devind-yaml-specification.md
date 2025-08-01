@@ -181,11 +181,12 @@ Variables from profiles and devtargets are combined according to inheritance and
 
 The `goals` section maps Makefile targets to a list of tokens representing devtargets and profiles.
 
-- Among the tokens, **one devtarget token must be present, prefixed with `dev-`**.
-- If multiple devtarget tokens are listed, only the first is used; the rest are ignored.
-- Other tokens without the `dev-` prefix are profiles, which are optional and extend or modify the devtarget’s behavior.
-- Profiles **do not** use the `profile-` prefix in goal definitions.
-- Goal-level profiles are applied **after** the devtarget and its inherited profiles, and their variable definitions **override** those from devtargets or profiles.
+- Exactly one devtarget token **must** be present per goal, and it **must** be prefixed with `dev-`.
+- If multiple devtarget tokens are specified, devind will fail with an error.
+- Tokens without the `dev-` prefix are interpreted as profiles.
+- **Profiles do not use the `profile-` prefix** in goal definitions.
+- Goal-level profiles are applied **after** the devtarget and any profiles inherited by that devtarget.
+- Variable definitions in goal-level profiles **override** variables set by devtargets or inherited profiles.
 
 Example:
 
