@@ -191,10 +191,15 @@ ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
   # Parse the goal value to extract devtarget and profiles
   GOAL_VALUE := $(strip $(call get_goal_value,$(GOAL)))
   GOAL_PROFILES := $(filter-out dev-%,$(GOAL_VALUE))
-  GOAL_DEVTARGET := $(firstword $(filter-out $(GOAL_PROFILES),$(GOAL_VALUE)))
+  GOAL_DEVTARGET := $(filter-out $(GOAL_PROFILES),$(GOAL_VALUE))
 
-  # Fallback to default devtarget if none explicitly defined in goal
-  ifeq ($(GOAL_DEVTARGET),)
+  ifneq ($(GOAL_DEVTARGET),)
+  	# Validate that exactly one devtarget is specified
+	ifneq ($(words $(GOAL_DEVTARGET)),1)
+		_ := $(call log_in_make,$(ERROR_TAG),Found multiple devtargets ($(words $(GOAL_DEVTARGET))) for goal \`$(GOAL)\`. Exactly one devtarget must be specified.)
+	endif
+  else
+    # Fallback to default devtarget if none explicitly defined in goal
     GOAL_DEVTARGET := $(strip $(call get_default_devtarget))
 
     ifeq ($(GOAL_DEVTARGET),)
