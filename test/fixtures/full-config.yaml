@@ -17,11 +17,28 @@ profiles:
     DOCKER_OPT+: -w /work
   dummy:
     DUMMY_VAR: dummy
+  remote-1:
+    SSH_USER: user1
+    SSH_HOST: host1
+  ssh-root:
+    SSH_USER: root
+  ssh-host:
+    SSH_HOST: host
+  ssh-user2:
+    SSH_USER: user2
+  ssh-host2:
+    SSH_HOST: host2
 
 devtargets:
   local:
     var:
       CMD_EXEC: $(DEFAULT_CMD_EXEC)
+
+  ssh:
+    var:
+      CMD_PREFIX: @echo "remote ssh command: ssh $(SSH_USER)@$(SSH_HOST)
+      CMD_EXEC: $(DEFAULT_CMD_EXEC)
+      CMD_SUFFIX: "
 
   docker:
     profiles:
@@ -45,3 +62,6 @@ goals:
   clean: dev-local
   build: dev-docker
   dummy: dev-dummy
+  remote-1-push: dev-ssh remote-1
+  remote-2-push: dev-ssh ssh-host ssh-root
+  remote-3-push: dev-ssh remote-1 ssh-root

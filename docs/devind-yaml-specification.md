@@ -8,15 +8,16 @@ The YAML structure supports profiles, devtargets, and goals, allowing you to def
 
 1. [Introduction](#introduction)
 2. [Top-Level Structure Overview](#top-level-structure-overview)
-3. [Detailed Breakdown](#detailed-breakdown)
+3. [Internal Variables](#internal-variables)
+4. [Detailed Breakdown](#detailed-breakdown)
    - [default_devtarget](#default_devtarget)
    - [global](#global)
    - [profiles](#profiles)
    - [devtargets](#devtargets)
    - [goals](#goals)
-4. [Variable Assignment and Appending](#variable-assignment-and-appending)
-5. [Configuration Example](#configuration-example)
-6. [Summary](#summary)
+5. [Variable Assignment and Appending](#variable-assignment-and-appending)
+6. [Configuration Example](#configuration-example)
+7. [Summary](#summary)
 
 ---
 
@@ -50,18 +51,64 @@ devtargets:                    # Required. Define devtargets that map to executi
     var:                       # Optional. Additional variables specific to this devtarget.
       VAR: value
       VAR+: value
-      CMD_PREFIX: value        # Required. Command prefix used to execute the target.
+      CMD_PREFIX: value        # Optional. Command prefix used to execute the target.
       CMD_SUFFIX: value        # Optional. Command suffix added after the Makefile goal.
 
 goals:                         # Required. Map Makefile targets to devtargets or profiles.
-  make_target: devtarget       # Goal mappings to a devtarget.
+  make_target: devtarget profile_name  # Goal mappings specify devtarget and optional profiles.
 ```
 
 ---
 
+## Internal Variables
+
+DevinD uses a set of **internal variables** during goal execution. These are divided into:
+
+- **Execution Variables (`CMD_XXX`)** – Meant to be **customized by users**.
+- **Goal Context Variables** – **Reserved** and automatically set by DevinD; **advanced users only** may reference them.
+
+
+### Command Execution Variables
+
+These variables control how the final command is executed by DevinD when a goal is run.
+They **should be configured as needed in YAML** (within profiles, devtargets, or global section).
+
+| Variable     | Description                                                 | Example                            |
+| ------------ | ----------------------------------------------------------- | ---------------------------------- |
+| `CMD_PREFIX` | Optional. Wrapper or environment initializer.               | `docker run -v $(PWD):/src my-img` |
+| `CMD_EXEC`   | Optional. The main command to run.                          | `make -f Makefile`                 |
+| `CMD_SUFFIX` | Optional. Arguments or flags passed after the main command. | `all DEBUG=1`                      |
+
+The final command is built as:
+```make
+$(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
+```
+
+#### Notes:
+
+- All parts are optional.
+- You are responsible for ensuring the assembled command is valid.
+- You may explicitly set CMD_EXEC := to suppress execution.
+
+### Goal Context Variables (Reserved)
+
+These are automatically computed by DevinD based on the goal configuration and **must not be defined or overridden in YAML**.
+They are available for **advanced use cases only**, such as in custom Makefile rules or debugging.
+
+| Variable             | Description                                           | Example                      |
+| -------------------- | ----------------------------------------------------- | ---------------------------- |
+| `GOAL_PROFILES`      | Profiles explicitly assigned to the goal.             | `default cross x86`          |
+| `GOAL_DEVTARGET`     | Devtarget assigned to the goal (with `dev-` prefix).  | `dev_local`                  |
+| `DEVTARGET`          | Raw devtarget name (`GOAL_DEVTARGET` without `dev-`). | `local`                      |
+| `DEVTARGET_PROFILES` | Profiles inherited from the devtarget.                | `docker-env arm64-toolchain` |
+
+#### Advanced Use Only:
+
+These are intended for debugging, diagnostics, or advanced Makefile logic.
+They are populated by DevinD and not meant to be modified by the user.
 ## Detailed Breakdown
 
-### **default_devtarget**
+### `default_devtarget`
 The `default_devtarget` specifies which devtarget is used if no specific devtarget is defined for a Makefile goal. This ensures that there is always a valid devtarget when running a goal.
 
 Example:
@@ -69,7 +116,7 @@ Example:
 default_devtarget: dev_local  # Use "dev_local" as the fallback if no devtarget is provided for a goal.
 ```
 
-### **global**
+### `global`
 The `global` section is optional and allows you to define variables that can be accessed by all profiles, devtargets, and goals. These variables are available globally within the configuration.
 
 Example:
@@ -78,7 +125,7 @@ global:
   DOCKER_IMAGE: example/devind:1.0  # Global variable accessible across all profiles and devtargets.
 ```
 
-### **profiles**
+### `profiles`
 Profiles are optional and provide reusable configurations for various environments. You can define settings and variables that are commonly shared among devtargets, which can inherit these profiles.
 
 - Variables within a profile are defined with `VAR: value`.
@@ -98,51 +145,80 @@ profiles:
     DUMMY_VAR: dummy  # Example profile for dummy variable.
 ```
 
-### **devtargets**
-Devtargets are **required** and define specific execution environments like local, Docker, or SSH. A devtarget can:
-- Inherit one or more profiles.
-- Define its own variables.
-  - Specify `CMD_PREFIX` (mandatory) and `CMD_SUFFIX` (optional) for how the target will be executed.
+### `devtargets`
 
-**Important Note**: `CMD_PREFIX` is required for every devtarget. However, if it is already defined in an inherited profile (e.g., `docker`), it **does not need to be redefined** in the devtarget. Only if `CMD_PREFIX` is not defined in the inherited profile(s), it should be specified within the devtarget.
+Devtargets define **execution environments** (e.g., local, Docker, SSH) and are **required**.
+
+Each devtarget can:
+
+* Inherit one or more profiles (which may define or append common variables).
+* Define or override its own variables.
 
 Example:
+
 ```yaml
 devtargets:
   local:
-    CMD_PREFIX: $(CMD_EXEC)  # Defined here because CMD_PREFIX is not set in profiles for 'local'
+    var:
+      CMD_EXEC: make $(GOAL)  # Just runs make
 
   docker-build:
     profiles:
-      - docker  # Inherits CMD_PREFIX from the docker profile
-      - docker_remove
-      - docker_interactive
+      - docker-remove           # append options in DOCKER_OPT var
+      - docker-interactive      # append options in DOCKER_OPT var
+      - docker-bind-workspace   # append options in DOCKER_OPT var
     var:
+      DOCKER_IMAGE: example/devind:1.0
       DOCKER_NAME: my-docker-build-container
       DOCKER_OPT+: --name $(DOCKER_NAME)
-      CMD_SUFFIX: -f Dockerfile  # Optional; defined here if needed, otherwise inherited from profiles.
+      CMD_PREFIX: docker run $(DOCKER_OPT) $(DOCKER_IMAGE)
+      CMD_EXEC: make $(GOAL)
 ```
 
-### **goals**
-The `goals` section maps Makefile targets to devtargets. This mapping determines which devtarget is executed when a Makefile goal is triggered.
+Variables from profiles and devtargets are combined according to inheritance and appending rules.
+
+### `goals`
+
+The `goals` section maps Makefile targets to a list of tokens representing devtargets and profiles.
+
+- Exactly one devtarget token **must** be present per goal, and it **must** be prefixed with `dev-`.
+- If multiple devtarget tokens are specified, devind will fail with an error.
+- Tokens without the `dev-` prefix are interpreted as profiles.
+- **Profiles do not use the `profile-` prefix** in goal definitions.
+- Goal-level profiles are applied **after** the devtarget and any profiles inherited by that devtarget.
+- Variable definitions in goal-level profiles **override** variables set by devtargets or inherited profiles.
 
 Example:
+
 ```yaml
 goals:
-  build-*: dev-docker-build  # All build-* targets map to dev-docker-build
-  b: dev-docker-build  # Goal "b" uses the "dev-docker-build" devtarget.
+  a_goal: dev-a profileA profileB
+  another_goal: dev-b profileX
+  third_goal: dev-c profileY profileZ
 ```
+
+Explanation:
+
+- For `a_goal`, devtarget `dev-a` is used, with profiles `profileA` and `profileB`.
+- For `another_goal`, devtarget `dev-b` is used, with profile `profileX`.
+- For `third_goal`, devtarget `dev-c` is used, with profiles `profileY` and `profileZ`.
+- Variables defined in goal-level profiles (e.g., `profileA`, `profileB`, `profileX`, etc.) override variables from the devtarget and its inherited profiles.
 
 ---
 
 
 ## Variable Assignment and Appending
 
-Variable declarations in the YAML configuration are **based directly on Makefile syntax and semantics**, with conventions to support both immediate assignment (`:=`) and appending (`+=`). These variable definitions are translated directly into valid Makefile logic.
+Variable declarations in the YAML configuration follow Makefile semantics:
+
+- **Immediate assignment** via `VAR: value`, which corresponds to `:=` in Makefile (evaluated at parse time).
+- **Appending** via `VAR+: value`, which corresponds to `+=` in Makefile, adding to existing variable content.
+
+This approach enables modular and incremental variable construction across profiles, devtargets, and goals.
 
 ### Standard Assignment
 
-Use a colon (`:`) in YAML to assign a value to a variable. This corresponds to `:=` in a Makefile, meaning the value is **evaluated immediately** when the Makefile is generated.
+Use a colon (`:`) in YAML to assign a value to a variable. This corresponds to `:=` in a Makefile, meaning the value is evaluated when the Makefile is parsed by make.
 
 ```yaml
 global:
@@ -154,9 +230,6 @@ This becomes:
 ```make
 CMD_EXEC := make -f $(DEVIND_MAKEFILE_ENTRY)
 ```
-
-> Make sure any variables used in the right-hand side (like `$(DEVIND_MAKEFILE_ENTRY)`) are already defined earlier in the configuration, or their value will be empty when expanded.
-
 
 ### Appending to Variables
 
@@ -180,13 +253,20 @@ DOCKER_OPT += --rm
 > This approach allows multiple profiles and devtargets to extend variables cleanly and modularly without overriding previous values.
 
 
-### Expansion Order
+### Expansion and Override Order
 
-Although `:=` is used internally (immediate expansion), the order in which values are declared and applied is critical for correct resolution of variable references:
+The variable expansion and override order is as follows to ensure correct resolution and layering of settings:
 
-1. **Global variables** (`global:`) are evaluated first and are visible to all profiles and devtargets.
-2. **Profiles** are processed next and may override or append to global variables.
-3. **Devtarget variables** (`devtargets[*].var:`) are applied after profiles and can rely on globals and profiles.
+1. **Global variables** (`global:`) are applied first and are visible everywhere.
+2. **Profiles** (inherited by devtargets) are applied next, potentially overriding or appending to global variables.
+3. **Devtarget variables** are applied after profiles, overriding or appending as needed.
+4. **Goal-level profiles** (if any) are applied last, overriding variables from devtargets and profiles.
+
+> Variables are expanded **only at runtime** by `devind`, not during YAML parsing or Makefile generation. Variable references (e.g., `$(VAR)`) remain unresolved in the generated Makefile and are substituted when commands are executed.
+
+
+This design ensures flexible layering and late binding of variables.
+
 
 ---
 
@@ -239,11 +319,19 @@ goals:
 
 ## Summary
 
-This specification outlines the structure and usage of the YAML configuration file used in **DevinD**. It covers the following key components:
+This specification defines the core structure of the **DevinD** YAML configuration used to manage build and development environments.
 
-- **Profiles**: Reusable setups that can be inherited by devtargets.
-- **Devtargets**: Specific execution environments that map to Makefile targets.
-- **Goals**: Mappings of Makefile targets to devtargets.
-- **Variable Assignment**: Supports Makefile-like variable assignments and appending using the `+` syntax.
+* **Profiles**: Reusable variable sets that define shared configuration. Profiles can be inherited by devtargets and specified in goals for contextual overrides.
+* **Devtargets**: Represent execution environments. Devtargets can define `CMD_PREFIX`, `CMD_EXEC`, and/or `CMD_SUFFIX` to control how commands are constructed and executed. These variables are optional, but the assembled command will always follow the form `$(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)`. Devtargets may inherit one or more profiles.
+* **Goals**: Map Makefile targets to a **goal context** composed of exactly one devtarget token (prefixed with `dev-`) and optional unprefixed profiles. Goal-level profiles are applied last and override all inherited variables.
+* **Variable Assignment**: Uses Makefile-style syntax: `VAR:` for assignment, `VAR+:` for appending. Supports layered overrides across global, profile, devtarget, and goal-profile scopes.
 
-By following this structure, you can efficiently manage and customize your development environments, ensuring that different execution contexts can be easily defined and reused.
+At goal execution time, DevinD assembles and runs the following command:
+
+```make
+$(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
+```
+
+These `CMD_XXX` variables **should be configured in YAML** to define execution behavior. Other internal variables like `GOAL_PROFILES`, `GOAL_DEVTARGET`, `DEVTARGET`, and `DEVTARGET_PROFILES` are reserved and automatically set. These are available to advanced users for conditional logic in Makefiles, but must not be overridden.
+
+This structure ensures predictable behavior and supports future features like hooks, plugin mechanisms, and advanced runtime behavior.

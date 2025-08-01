@@ -35,12 +35,17 @@ parse_yaml() {
     run parse_yaml "node" "profiles" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
 
-    [ "${#lines[@]}" -eq 5 ]
+    [ "${#lines[@]}" -eq 10 ]
     assert_line 'docker'
     assert_line 'docker-interactive'
     assert_line 'docker-remove'
     assert_line 'docker-bind-workspace'
     assert_line 'dummy'
+    assert_line 'remote-1'
+    assert_line 'ssh-root'
+    assert_line 'ssh-host'
+    assert_line 'ssh-user2'
+    assert_line 'ssh-host2'
 }
 
 @test "parser retrieve all global variables from full-config.yaml" {
@@ -81,11 +86,14 @@ parse_yaml() {
     run parse_yaml "node" "goals" "$DEVIND_YAML_FULL"
     [ "$status" -eq 0 ]
 
-    [ "${#lines[@]}" -eq 4 ]
+    [ "${#lines[@]}" -eq 7 ]
     assert_line 'hello'
     assert_line 'clean'
     assert_line 'build'
     assert_line 'dummy'
+    assert_line 'remote-1-push'
+    assert_line 'remote-2-push'
+    assert_line 'remote-3-push'
 }
 
 @test "parser retrieve goal devtarget from full-config.yaml" {
