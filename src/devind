@@ -271,7 +271,6 @@ $(DEVIND_GENERATE_FOLDER)/goal-%.mk: $(DEVIND_GENERATE_FOLDER)/global.mk $(GOAL_
 .PHONY: devind-target-runner
 devind-target-runner: $(DEVIND_GENERATE_FOLDER)/goal-%.mk
 	$(eval include $^ )
-	$(QUIET)$(call log,$(DEBUG_TAG),Including: $^)
 	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(GOAL_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
 	$(QUIET)echo
