@@ -54,7 +54,7 @@ parse_yaml() {
     [ "$status" -eq 0 ]
 
     [ "${#lines[@]}" -eq 3 ]
-    assert_line 'DEFAULT_CMD_EXEC:= make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)'
+    assert_line 'DEFAULT_CMD_EXEC:= make -f Makefile $(GOAL)'
     assert_line 'CMD_PREFIX:= '
     assert_line 'CMD_SUFFIX:= '
 }

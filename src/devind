@@ -24,7 +24,6 @@ DEVINDRC_FILE	:= .devindrc
 include $(wildcard $(DEVINDRC_FILE))
 
 # Configuration ---------------------------------------------------------------
-DEVIND_MAKEFILE_ENTRY 		?= Makefile
 DEVIND_FOLDER 				?= .devind
 DEVIND_GENERATE_FOLDER		?= $(DEVIND_FOLDER)/generated
 DEVIND_YAML_FILE 			?= devind.yaml
@@ -115,17 +114,12 @@ configure-devind: overwrite-devindrc ## Interactive DevinD Configuration (writti
 		read devind_folder; \
 		devind_folder=$${devind_folder:-$(DEVIND_FOLDER)}; \
 		\
-		$(call log,$(CONF_TAG),Enter the path to the Makefile (default: $(DEVIND_MAKEFILE_ENTRY)): ,n); \
-		read devind_makefile_entry; \
-		devind_makefile_entry=$${devind_makefile_entry:-$(DEVIND_MAKEFILE_ENTRY)}; \
-		\
 		$(call log,$(CONF_TAG),Enter the path to the YAML file (default: $(DEVIND_YAML_FILE)): ,n); \
 		read devind_yaml_file; \
 		devind_yaml_file=$${devind_yaml_file:-$(DEVIND_YAML_FILE)}; \
 		\
 		{ \
 			echo "# Auto-Generated DevinD Configuration File"; \
-			echo "DEVIND_MAKEFILE_ENTRY ?= $$devind_makefile_entry"; \
 			echo "DEVIND_FOLDER ?= $$devind_folder"; \
 			echo "DEVIND_YAML_FILE ?= $$devind_yaml_file"; \
 		} > $(DEVINDRC_FILE) ;\
@@ -271,7 +265,7 @@ $(DEVIND_GENERATE_FOLDER)/goal-%.mk: $(DEVIND_GENERATE_FOLDER)/global.mk $(GOAL_
 .PHONY: devind-target-runner
 devind-target-runner: $(DEVIND_GENERATE_FOLDER)/goal-%.mk
 	$(eval include $^ )
-	$(QUIET)$(call log,$(EXEC_TAG),Running make target \`$(GOAL)\` in devtarget: $(GOAL_DEVTARGET))
+	$(QUIET)$(call log,$(EXEC_TAG),Running goal \`$(GOAL)\` in devtarget: $(GOAL_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
 	$(QUIET)echo
 

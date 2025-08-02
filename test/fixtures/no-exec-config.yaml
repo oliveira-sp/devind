@@ -4,7 +4,7 @@ global:
   CMD_EXEC:
   CMD_PREFIX:
   CMD_SUFFIX:
- 
+
 devtargets:
   default:
     var:
