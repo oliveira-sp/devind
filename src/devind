@@ -185,7 +185,7 @@ ifeq (devind-target-runner,$(filter devind-target-runner,$(MAKECMDGOALS)))
   # Parse the goal value to extract devtarget and profiles
   GOAL_VALUE := $(strip $(call get_goal_value,$(GOAL)))
   GOAL_PROFILES := $(filter-out dev-%,$(GOAL_VALUE))
-  GOAL_DEVTARGET := $(filter-out $(GOAL_PROFILES),$(GOAL_VALUE))
+  GOAL_DEVTARGET ?= $(filter-out $(GOAL_PROFILES),$(GOAL_VALUE))
 
   ifneq ($(GOAL_DEVTARGET),)
   	# Validate that exactly one devtarget is specified
@@ -263,12 +263,22 @@ $(DEVIND_GENERATE_FOLDER)/goal-%.mk: $(DEVIND_GENERATE_FOLDER)/global.mk $(GOAL_
 
 # Target Runner (includes all environment data and runs target) ---------------
 .PHONY: devind-target-runner
-devind-target-runner: $(DEVIND_GENERATE_FOLDER)/goal-%.mk
+devind-target-runner: $(DEVIND_GENERATE_FOLDER)/goal-$(GOAL).mk
 	$(eval include $^ )
 	$(QUIET)$(call log,$(EXEC_TAG),Running goal \`$(GOAL)\` in devtarget: $(GOAL_DEVTARGET))
 	$(QUIET) $(CMD_PREFIX) $(CMD_EXEC) $(CMD_SUFFIX)
 	$(QUIET)echo
 
 # Target Dispatcher: Default Goal Passthrough ---------------------------------
+ifeq ($(filter devind-target-runner,$(MAKECMDGOALS)),)
+
+.PHONY: dev-%
+dev-%:
+	$(QUIET)$(call log,$(WARN_TAG),Devtarget override set to \`$@\`. Replacing YAML configuration for following goals.)
+	$(eval FORCE_DEVTARGET:= GOAL_DEVTARGET=$@)
+
 %:
-	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) devind-target-runner GOAL=$@
+	$(QUIET) $(MAKE) -f $(firstword $(MAKEFILE_LIST)) \
+	devind-target-runner GOAL=$@ $(FORCE_DEVTARGET)
+
+endif

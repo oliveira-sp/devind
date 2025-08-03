@@ -5,18 +5,29 @@ global:
   CMD_PREFIX:
   CMD_SUFFIX:
 
+profiles:
+  d:
+    VAR: var from profile d
+  echo-dummy:
+    CMD_EXEC: echo $(VAR)
+
 devtargets:
   default:
     var:
-      DUMMY: nice
+      VAR: var from devtarget default
   a:
     var:
-      DUMMY: one
+      VAR: var from devtarget a
   b:
     var:
-      FOO: BAR
+      VAR: var from devtarget b
+  d:
+    profiles:
+      - d
+      
 
 goals:
   a: dev-a
   b: dev-default
   c: dev-b
+  d: dev-d echo-dummy

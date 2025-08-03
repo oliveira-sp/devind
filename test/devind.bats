@@ -36,9 +36,9 @@ load test_helper.bash
   export DEVIND_YAML_FILE="$DEVIND_YAML_NO_EXEC"
   export COLOR_ENABLED=0
 
-  run ./devind d # d is not defined in the YAML, should use default
+  run ./devind z # z is not defined in the YAML, should use default
 
-  assert_line '[EXEC] Running goal `d` in devtarget: dev-default'
+  assert_line '[EXEC] Running goal `z` in devtarget: dev-default'
 }
 
 @test "devind fails when default devtarget is not defined" {
@@ -252,4 +252,26 @@ load test_helper.bash
 
   [ "$status" -eq 2 ]
   assert_line '[ERROR] Found multiple devtargets (3) for goal `multiple-devtargets`. Exactly one devtarget must be specified.'
+}
+
+@test "devind run goal on force devtarget" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+
+  run ./devind dev-a b
+
+  # Check that the command corresponds with the forced devtarget
+  assert_output --partial '[WARN] Devtarget override set to `dev-a`. Replacing YAML configuration for following goals.'
+  assert_output --partial '[EXEC] Running goal `b` in devtarget: dev-a'
+}
+
+@test "devind do not include overrided devtarget's profiles" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_NO_EXEC"
+  export COLOR_ENABLED=0
+
+  run ./devind dev-b d
+
+  # Check that the command does not include profiles from the original devtarget
+  assert_output --partial '[EXEC] Running goal `d` in devtarget: dev-b'
+  assert_output --partial 'var from devtarget b'
 }
