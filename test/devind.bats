@@ -22,23 +22,23 @@ load test_helper.bash
 
   run ./devind a
 
-  assert_line '[EXEC] Running make target `a` in devtarget: dev-a'
+  assert_line '[EXEC] Running goal `a` in devtarget: dev-a'
 
   run ./devind b
 
-  assert_line '[EXEC] Running make target `b` in devtarget: dev-default'
+  assert_line '[EXEC] Running goal `b` in devtarget: dev-default'
 
   run ./devind c
-  assert_line '[EXEC] Running make target `c` in devtarget: dev-b'
+  assert_line '[EXEC] Running goal `c` in devtarget: dev-b'
 }
 
 @test "default devtarget is correctly selected when not specified" {
   export DEVIND_YAML_FILE="$DEVIND_YAML_NO_EXEC"
   export COLOR_ENABLED=0
 
-  run ./devind d # d is not defined in the YAML, should use default
+  run ./devind z # z is not defined in the YAML, should use default
 
-  assert_line '[EXEC] Running make target `d` in devtarget: dev-default'
+  assert_line '[EXEC] Running goal `z` in devtarget: dev-default'
 }
 
 @test "devind fails when default devtarget is not defined" {
@@ -64,7 +64,7 @@ load test_helper.bash
 
   run ./devind clean
 
-  assert_output --partial '[EXEC] Running make target `clean` in devtarget: dev-local'
+  assert_output --partial '[EXEC] Running goal `clean` in devtarget: dev-local'
   assert_output --partial 'make -f Makefile clean'
 }
 
@@ -76,7 +76,7 @@ load test_helper.bash
   run ./devind hello
 
   # Assert that CMD_PREFIX is correctly set before CMD_EXEC
-  assert_output --partial '[EXEC] Running make target `hello` in devtarget: dev-docker'
+  assert_output --partial '[EXEC] Running goal `hello` in devtarget: dev-docker'
   assert_output --partial 'docker run --rm -it -v .:/work -w /work hello-devind:latest make -f Makefile hello'
 }
 
@@ -88,7 +88,7 @@ load test_helper.bash
   run ./devind dummy
 
   # Assert that CMD_SUFFIX is correctly set after CMD_EXEC
-  assert_output --partial '[EXEC] Running make target `dummy` in devtarget: dev-dummy'
+  assert_output --partial '[EXEC] Running goal `dummy` in devtarget: dev-dummy'
   assert_output --partial '[DUMMY_PREFIX] echo "dummy command" [DUMMY_SUFFIX]'
 }
 
@@ -112,7 +112,7 @@ load test_helper.bash
     '#------------------------------------------------------------------------------' \
     '' \
     '# Global Variables Definitions' \
-    'DEFAULT_CMD_EXEC:= make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)' \
+    'DEFAULT_CMD_EXEC:= make -f Makefile $(GOAL)' \
     'CMD_PREFIX:= ' \
     'CMD_SUFFIX:= ' \
     ''
@@ -214,36 +214,33 @@ load test_helper.bash
 @test "devind goal inherits profiles correctly" {
   export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
   export COLOR_ENABLED=0
-  export V=1 # Enable verbose output
 
   run ./devind remote-1-push
 
   # Check that the command corresponds with the inherited profile
-  assert_output --partial '[EXEC] Running make target `remote-1-push` in devtarget: dev-ssh'
+  assert_output --partial '[EXEC] Running goal `remote-1-push` in devtarget: dev-ssh'
   assert_output --partial 'remote ssh command: ssh user1@host1 make -f Makefile remote-1-push'
 }
 
 @test "devind goal inherits multiple profiles correctly" {
   export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
   export COLOR_ENABLED=0
-  export V=1 # Enable verbose output
 
   run ./devind remote-2-push
 
   # Check that the command corresponds with the inherited profiles
-  assert_output --partial '[EXEC] Running make target `remote-2-push` in devtarget: dev-ssh'
+  assert_output --partial '[EXEC] Running goal `remote-2-push` in devtarget: dev-ssh'
   assert_output --partial 'remote ssh command: ssh root@host make -f Makefile remote-2-push'
 }
 
 @test "devind goal profiles override devtarget variables correctly" {
   export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
   export COLOR_ENABLED=0
-  export V=1 # Enable verbose output
 
   run ./devind remote-3-push
 
   # Check that the command corresponds with the inherited profiles
-  assert_output --partial '[EXEC] Running make target `remote-3-push` in devtarget: dev-ssh'
+  assert_output --partial '[EXEC] Running goal `remote-3-push` in devtarget: dev-ssh'
   assert_output --partial 'remote ssh command: ssh root@host1 make -f Makefile remote-3-push'
 }
 
@@ -255,4 +252,26 @@ load test_helper.bash
 
   [ "$status" -eq 2 ]
   assert_line '[ERROR] Found multiple devtargets (3) for goal `multiple-devtargets`. Exactly one devtarget must be specified.'
+}
+
+@test "devind run goal on force devtarget" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_FULL"
+  export COLOR_ENABLED=0
+
+  run ./devind dev-a b
+
+  # Check that the command corresponds with the forced devtarget
+  assert_output --partial '[WARN] Devtarget override set to `dev-a`. Replacing YAML configuration for following goals.'
+  assert_output --partial '[EXEC] Running goal `b` in devtarget: dev-a'
+}
+
+@test "devind do not include overrided devtarget's profiles" {
+  export DEVIND_YAML_FILE="$DEVIND_YAML_NO_EXEC"
+  export COLOR_ENABLED=0
+
+  run ./devind dev-b d
+
+  # Check that the command does not include profiles from the original devtarget
+  assert_output --partial '[EXEC] Running goal `d` in devtarget: dev-b'
+  assert_output --partial 'var from devtarget b'
 }

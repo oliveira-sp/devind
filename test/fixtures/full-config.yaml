@@ -1,7 +1,7 @@
 default_devtarget: dev-local
 
 global:
-  DEFAULT_CMD_EXEC: make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)
+  DEFAULT_CMD_EXEC: make -f Makefile $(GOAL)
   CMD_PREFIX:
   CMD_SUFFIX:
 
@@ -36,9 +36,10 @@ devtargets:
 
   ssh:
     var:
-      CMD_PREFIX: @echo "remote ssh command: ssh $(SSH_USER)@$(SSH_HOST)
+      CMD_PREFIX: echo remote ssh command:
+      CMD_PREFIX+: ssh $(SSH_USER)@$(SSH_HOST)
       CMD_EXEC: $(DEFAULT_CMD_EXEC)
-      CMD_SUFFIX: "
+      CMD_SUFFIX: 
 
   docker:
     profiles:

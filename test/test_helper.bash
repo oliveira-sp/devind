@@ -41,11 +41,8 @@ setup() {
 
 
 teardown() {
-  
-  echo ""
-  echo "Exit status: $status"
-  echo "== Output =="
-  printf "$output"
+  # Clean up generated files
+  ./devind clean-gen
 
   rm -rf "$TMPDIR"
 }
