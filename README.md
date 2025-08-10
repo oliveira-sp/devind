@@ -1,5 +1,28 @@
 # DevinD - Multi-Environment Build and Development Flow Management
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Clone the Repository](#clone-the-repository)
+  - [Build DevinD](#build-devind)
+  - [Verify Installation](#verify-installation)
+  - [Run the Hello-World Example](#run-the-hello-world-example)
+  - [Integrate DevinD into Your Project](#integrate-devind-into-your-project)
+    - [Build the DevinD script](#build-the-devind-script)
+    - [Copy DevinD to your project](#copy-devind-to-your-project)
+    - [Make it executable](#make-it-executable)
+    - [(Optional) Configure DevinD](#optional-configure-devind)
+    - [Create YAML Configuration](#create-yaml-configuration)
+    - [Run DevinD](#run-devind)
+- [How It Works](#how-it-works)
+  - [Execution Flow](#execution-flow)
+- [Testing](#testing)
+- [Contribution](#contribution)
+- [License](#license)
+
 ## Introduction
 
 **DevinD** is a flexible wrapper tool designed to enhance and manage build and development workflows centered around Makefile projects. It acts as a configurable execution layer that transparently runs your Makefile targets across various environments, including but not limited to:
