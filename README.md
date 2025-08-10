@@ -4,30 +4,40 @@
 
 **DevinD** is a flexible wrapper tool designed to enhance and manage build and development workflows centered around Makefile projects. It acts as a configurable execution layer that transparently runs your Makefile targets across various environments, including but not limited to:
 
-- Local machine execution
-- Local containerized environments (e.g., Docker)
-- Remote machines accessed via SSH
-- Containers running on remote hosts
-- Custom environments that can be extended as needed
+* Local machine execution
+* Local containerized environments (e.g., Docker)
+* Remote machines accessed via SSH
+* Containers running on remote hosts
+* Custom environments that can be extended as needed
 
 While DevinD is Makefile-focused, its design allows integration with other build or automation tools, making it a versatile solution for consistent, portable, and environment-agnostic task execution. It requires minimal changes to existing projects and enables teams to scale workflows from simple local builds to complex multi-environment deployments.
 
 ## Features
 
-- **Makefile Wrapper**: Seamlessly integrates with existing Makefile projects, wrapping your build scripts without requiring modifications.
+* **Makefile Wrapper**: Seamlessly integrates with existing Makefile projects, wrapping your build scripts without requiring modifications.
 
-- **Multi-Environment Execution**: Run tasks locally, inside local or remote containers, or on remote machines—extensible to custom environments as needed.
+* **Multi-Environment Execution**: Run tasks locally, inside local or remote containers, or on remote machines—extensible to custom environments as needed.
 
-- **Configurable Execution Targets**: Define custom environment configurations per goal to control exactly where and how each task runs.
+* **Configurable Execution Targets**: Define custom environment configurations per goal to control exactly where and how each task runs.
 
-- **Unified Workflow**: Manage builds, tests, and executions consistently across all environments through a single interface.
+* **Inline Devtarget Overrides**: Override the YAML-defined devtarget on the command line by specifying a devtarget before one or more goals to control their execution environment.
 
-- **Portable & Lightweight**: Requires only standard tools (`make`, `awk`, `bash`), making it easy to use across diverse Unix-like systems without extra dependencies.
+  Example:
 
-- **Minimal Intrusion**: Adds powerful environment abstraction without disrupting existing project workflows.
+  ```sh
+  ./devind dev-a build test dev-b lint package
+  ```
 
-- **Scalable**: Suitable for both simple local setups and complex distributed development environments.
+  * `build` and `test` run with **dev-a**
+  * `lint` and `package` run with **dev-b**
 
+* **Unified Workflow**: Manage builds, tests, and executions consistently across all environments through a single interface.
+
+* **Portable & Lightweight**: Requires only standard tools (`make`, `awk`, `bash`), making it easy to use across diverse Unix-like systems without extra dependencies.
+
+* **Minimal Intrusion**: Adds powerful environment abstraction without disrupting existing project workflows.
+
+* **Scalable**: Suitable for both simple local setups and complex distributed development environments.
 
 ## Getting Started
 
@@ -45,18 +55,31 @@ git clone https://gitlab.com/oliveira.s/devind.git
 cd devind
 ```
 
+### Build DevinD
+
+Before running DevinD, you must build the distributable script:
+
+```sh
+make build
+```
+
+The resulting executable will be available at:
+
+```
+.build/devind
+```
+
 ### Verify Installation
 
 Run the built-in help command to confirm DevinD is functional:
 
 ```sh
-cd src
-./devind help
+./.build/devind help
 ```
 
 ### Run the Hello-World Example
 
-Before running the example, build the required Docker image:
+First, build the required Docker image:
 
 ```sh
 make docker-build -C examples/hello-world
@@ -78,56 +101,63 @@ This will execute the `hello` goal inside the `hello-world` example environment,
 > make list-examples
 > ```
 
-## Integrate DevinD in Your Project
 
-### 1. Add DevinD Scripts
+### Integrate DevinD into Your Project
 
-Copy the following files into your project root or a dedicated tools folder:
+1. **Build the DevinD script**
 
-- `devind` (main wrapper script)
-- `devind_yaml_parser.awk` (required YAML parser)
+   From the DevinD source repository:
 
-> ⚠️ Ensure the `devind` script has execution permissions:
->
-> ```sh
-> chmod +x devind
-> ```
+   ```sh
+   make build
+   ```
 
-### 2. Configure DevinD (Optional)
+   This creates the executable `.build/devind`.
 
-Run the interactive configuration to create a `.devindrc` file with default variables:
+2. **Copy DevinD to your project**
 
-- `DEVIND_MAKEFILE_ENTRY`
-- `DEVIND_FOLDER`
-- `DEVIND_YAML_FILE`
+   Copy the built script to your project root or a dedicated tools folder:
 
-```sh
-./devind configure-devind
-```
+   ```sh
+   cp .build/devind /path/to/your/project/
+   ```
 
-This step is optional, but recommended to explicitly define where configuration and generated files will reside.
+3. **Make it executable**
 
-### 3. Create YAML Configuration
+   In your project, ensure the script has execution permissions:
 
-Define your project setup in a YAML file (default: `devind.yaml`):
+   ```sh
+   chmod +x /path/to/your/project/devind
+   ```
 
-* Set up `profiles`, `devtargets`, and `goals`
-* Map each goal to a specific execution environment
-* Include variables like `CMD_PREFIX`, `CMD_EXEC`, `CMD_SUFFIX` for goal behavior
+4. **(Optional) Configure DevinD**
 
-> ✅ Example YAML configurations are available in `examples/`
-> 📖 For the full format, see [`docs/devind-yaml-specification.md`](docs/devind-yaml-specification.md)
+   Run the interactive configuration to create or update `.devindrc` for your project:
 
-### 4. Example Usage
+   ```sh
+   ./devind configure-devind
+   ```
 
-Use DevinD to execute a configured goal:
+5. **Create YAML Configuration**
 
-```sh
-./devind <goal>
-```
+   Define your project setup in a YAML file (default: `devind.yaml`):
 
-This runs the specified goal in the resolved environment using the configuration from your YAML file.
+   * Set up `profiles`, `devtargets`, and `goals`
 
+   * Map each goal to a specific execution environment
+
+   * Include variables like `CMD_PREFIX`, `CMD_EXEC`, `CMD_SUFFIX` for goal behavior
+
+   > ✅ Example YAML configurations are available in `examples/`
+   > 📖 For the full format, see [`docs/devind-yaml-specification.md`](docs/devind-yaml-specification.md)
+
+6. **Run DevinD**
+
+   Execute goals using:
+
+   ```sh
+   ./devind <goal>
+   ```
 
 ## How It Works
 
@@ -212,7 +242,7 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
    Running:
 
    ```sh
-   ./devind hello
+   ./.build/devind hello
    ```
 
    Resolves the `hello` goal to `dev-docker`, applies the relevant profiles, merges the variables, and executes:
@@ -224,7 +254,7 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
    Running an undefined goal like:
 
    ```sh
-   ./devind build
+   ./.build/devind build
    ```
 
    Will still work, using the `default_devtarget` (`dev-local` in this example), and executing:
@@ -233,7 +263,21 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
    make -f <your-makefile> build
    ```
 
-> 💡 **Tip:** If `CMD_EXEC` is not defined (either directly or via `DEFAULT_CMD_EXEC`), DevinD will **skip execution** for that goal — making it easy to define goals that only manipulate environments or perform non-command steps.
+   You can also mix environments for different goals:
+
+   ```sh
+   ./.build/devind dev-a build test dev-b lint package
+   ```
+
+## Testing
+
+Run the unit tests with:
+
+```sh
+make test
+```
+
+This executes all Bats test files under `tests/`.
 
 ## Contribution
 
