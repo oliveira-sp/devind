@@ -2,6 +2,26 @@
 
 This file documents all notable changes to the DevinD project.
 
+## [v0.3] - 2025-08-12
+
+### Added
+
+* Global override support for devtarget selection in `devind` Makefile.
+* Profile inheritance support in goal definitions.
+* Embedded external AWK YAML parser into the final `devind` script for distribution.
+* CI jobs for running unit tests and building the devind executable.
+* Minimal unit tests covering core DevinD functionality and YAML parsing.
+* Dedicated development Makefile for improved developer workflow.
+
+### Changed
+
+* Refactored project structure for better maintainability.
+* Improved multi-goal execution and fallback mechanisms.
+
+### Fixed
+
+* Help target no longer breaks if `.devindrc` configuration file is missing.
+
 ## [0.2] - 2025-05-24
 
 ### Added
