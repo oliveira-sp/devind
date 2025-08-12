@@ -293,24 +293,44 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
 
 Contributions are welcome! To contribute:
 
-1. **Fork the Repository**
-2. **Create a Feature Branch**
+1. **Fork the repository** (if you don’t have write access).
+
+2. **Create a feature branch** following the Gitflow naming convention:
 
    ```sh
    git checkout -b feature/your-feature-name
    ```
-3. **Commit Changes**
+
+   For bug fixes use `bugfix/`, for hotfixes use `hotfix/`, etc. Follow the Gitflow workflow for branch types.
+
+3. **Commit your changes** following the Conventional Commits specification:
 
    ```sh
-   git commit -m "Add feature: your-feature-name"
+   git commit -m "feat: add your feature description"
    ```
-4. **Push and Create MR**
+
+   Other examples:
 
    ```sh
-   git push origin feature/your-feature-name
+   git commit -m "feat: implement YAML override support"
+   git commit -m "fix: correct devtarget selection in override mode"
    ```
 
-Submit a Merge Request (MR) with a detailed description. Please keep changes well-documented and tested.
+4. **Push your branch** to the origin (your fork if applicable):
+
+   ```sh
+   git push -u origin feature/your-feature-name
+   ```
+
+5. **Create a Merge Request (MR) in GitLab**:
+
+   * Set the target branch according to Gitflow (e.g., `develop` for features, `main` for hotfixes)
+   * Link to any related issues
+   * Add labels and milestones if applicable
+   * Assign reviewers
+   * Ensure your MR includes tests and updated documentation
+
+Please keep changes well-documented, follow coding standards, and ensure all tests pass (`make test`) before requesting a merge.
 
 ## License
 
