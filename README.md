@@ -229,7 +229,8 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
    default_devtarget: dev-local
 
    global:
-     DEFAULT_CMD_EXEC: make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)
+      DEVIND_MAKEFILE_ENTRY: Makefile
+      DEFAULT_CMD_EXEC: make -f $(DEVIND_MAKEFILE_ENTRY) $(GOAL)
 
    profiles:
      docker:
@@ -271,7 +272,7 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
    Resolves the `hello` goal to `dev-docker`, applies the relevant profiles, merges the variables, and executes:
 
    ```sh
-   docker run --rm -it -v .:/work -w /work hello-devind:latest make -f <your-makefile> hello
+   docker run --rm -it -v .:/work -w /work hello-devind:latest make -f Makefile hello
    ```
 
    Running an undefined goal like:
@@ -283,24 +284,10 @@ DevinD is a Makefile-based task runner driven by a declarative YAML configuratio
    Will still work, using the `default_devtarget` (`dev-local` in this example), and executing:
 
    ```sh
-   make -f <your-makefile> build
+   make -f Makefile build
    ```
 
-   You can also mix environments for different goals:
-
-   ```sh
-   ./.build/devind dev-a build test dev-b lint package
-   ```
-
-## Testing
-
-Run the unit tests with:
-
-```sh
-make test
-```
-
-This executes all Bats test files under `tests/`.
+> 💡 **Tip:** If `CMD_PREFIX`, `CMD_EXEC`, and `CMD_SUFFIX` are all undefined, DevinD will **skip execution** for that goal — useful for defining goals that only adjust environments or perform non-command steps.
 
 ## Contribution
 
